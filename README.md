@@ -9,7 +9,7 @@ pip install git+https://github.com/yehor-morylov/drone_detection_inference_logic
 
 ## Preparing of environment
 
-If you cloned the repository and you want to make some code changes/use library, please do:
+For development:
 ```
 git clone https://github.com/yehor-morylov/drone_detection_inference_logic.git && cd drone_detection_inference_logic
 pip install -e .
