@@ -1,11 +1,14 @@
 defaults:
   - _self_
   - input: test
+
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog
+  - override hydra/launcher: joblib
 
 hydra:
   run:
     dir: logs
   sweep:
-    dir: logs
+    dir: ${hydra.run.dir}
+    subdir: ${hydra.job.override_dirname}
