@@ -7,3 +7,5 @@ defaults:
 hydra:
   run:
     dir: logs
+  sweep:
+    dir: logs
