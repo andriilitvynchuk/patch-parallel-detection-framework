@@ -1,11 +1,9 @@
 defaults:
   - _self_
+  - input: new
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog
 
 hydra:
   run:
-    dir: logs/${now:%Y-%m-%d_%H-%M-%S}_${hydra.job.override_dirname}
-  sweep:
-    dir: logs/${now:%Y-%m-%d_%H-%M-%S}
-    subdir: ${hydra.job.override_dirname}
+    dir: logs
