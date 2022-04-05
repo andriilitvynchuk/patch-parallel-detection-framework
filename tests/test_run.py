@@ -1,13 +1,9 @@
+import os
 import tempfile
 from pathlib import Path
-from typing import Generator
+from typing import Generator, List
 
 import pytest
-from hydra import compose, initialize
-from omegaconf import DictConfig
-
-from dronedet.run import run
-from dronedet.utils import patch_empty_params
 
 
 @pytest.fixture(scope="session")
@@ -22,15 +18,12 @@ def logs_folder(custom_tmp_path: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
-def cfg(logs_folder: Path) -> DictConfig:
-    initialize(config_path="../dronedet/conf", job_name="tests")
-    cfg = compose(
-        config_name="config",
-        overrides=[f"hydra.run.dir={logs_folder}"],
-    )
-    cfg = patch_empty_params(cfg)
-    return cfg
+def overrides(logs_folder: Path) -> List[str]:
+    overrides = [f"hydra.run.dir={logs_folder}"]
+    return overrides
 
 
-def test_run(cfg: DictConfig) -> None:
-    run(cfg)
+def test_run(overrides: List[str]) -> None:
+    command = "python -m dronedet.run " + " ".join(overrides)
+    result_code = os.system(command)
+    assert result_code == 0

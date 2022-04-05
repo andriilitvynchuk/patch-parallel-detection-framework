@@ -1,6 +1,7 @@
 colorlog==6.6.0
-hydra-colorlog==1.1.0
 hydra-core==1.1.1
+hydra-colorlog==1.1.0
+hydra-joblib-launcher==1.1.5
 opencv-python==4.5.5.64
 opencv-python-headless==4.5.5.64
 torch
