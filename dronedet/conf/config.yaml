@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - input: new
+  - input: test
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog
 
