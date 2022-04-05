@@ -1,0 +1,22 @@
+[tool.isort]
+line_length = 119
+force_grid_wrap = 0
+multi_line_output = 3
+lines_after_imports = 2
+use_parentheses = true
+include_trailing_comma = true
+ensure_newline_before_comments = true
+skip_glob = [".git", ".idea", ".vscode"]
+
+[tool.black]
+line_length = 119
+
+[tool.mypy]
+ignore_missing_imports = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = false
+strict_optional = true
+warn_no_return = true
+warn_unused_ignores = false
