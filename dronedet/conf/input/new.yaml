@@ -1,0 +1,5 @@
+defaults:
+  - test
+  - _self_
+
+path: path_to_new_video
