@@ -25,5 +25,4 @@ def overrides(logs_folder: Path) -> List[str]:
 
 def test_run(overrides: List[str]) -> None:
     command = "python -m dronedet.run " + " ".join(overrides)
-    result_code = os.system(command)
-    assert result_code == 0
+    assert os.system(command) == 0
