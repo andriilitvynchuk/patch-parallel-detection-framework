@@ -1,5 +1,5 @@
 cameras:
-  url: 'data/cam1_cut.mp4'
+  url: data/videos/cam1_cut.mp4
   name: camera1
   height: 736
   width: 1280
