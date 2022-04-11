@@ -63,7 +63,7 @@ class MultithreadingOpencvStreamCapture:
                 meta_information.update(dict(time=time.time(), success=True))
                 self._last_connection_time = meta_information["time"]
             else:
-                image = torch.zeros((3, self._height, self._width), torch.uint8, self._device)  # type: ignore
+                image = torch.zeros((3, self._height, self._width), dtype=torch.uint8, device=self._device)
                 if self._channel_order == "HWC":
                     image = image.permute(1, 2, 0)
                 meta_information.update(dict(time=time.time(), success=False))
