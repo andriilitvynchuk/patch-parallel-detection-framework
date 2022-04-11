@@ -1,3 +1,0 @@
-[submodule "dronedet/shared_numpy"]
-	path = dronedet/shared_numpy
-	url = https://github.com/dillonalaird/shared_numpy.git
