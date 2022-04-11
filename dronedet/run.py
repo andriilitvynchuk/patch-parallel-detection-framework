@@ -4,10 +4,10 @@ import hydra
 import torch
 from omegaconf import DictConfig
 
-from dronedet.objects.base import SimplePipeline
-from dronedet.objects.stream_readers import ReadImagesToBatchRunner
-from dronedet.objects.visualization import VisualizationRunnerManager
+from dronedet.base import SimplePipeline
+from dronedet.stream_readers import ReadImagesToBatchRunner
 from dronedet.utils import patch_empty_params, patch_relative_paths
+from dronedet.visualization import VisualizationRunnerManager
 
 
 class DroneDetPipeline(SimplePipeline):

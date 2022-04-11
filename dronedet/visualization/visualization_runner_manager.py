@@ -5,8 +5,8 @@ from typing import Any, Dict, Optional
 import cv2
 import numpy as np
 
-from dronedet.objects.base import SimpleRunnerManager  # type: ignore
-from dronedet.objects.shared_numpy_utils import unlink_dict  # type: ignore
+from dronedet.base import SimpleRunnerManager  # type: ignore
+from dronedet.utils import unlink_dict  # type: ignore
 
 
 class VisualizationRunnerManager(SimpleRunnerManager):

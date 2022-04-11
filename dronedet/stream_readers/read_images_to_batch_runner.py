@@ -4,7 +4,7 @@ from typing import Any, Dict
 import torch
 
 import shared_numpy as snp
-from dronedet.objects.base import SimpleRunner  # type: ignore
+from dronedet.base import SimpleRunner  # type: ignore
 from dronedet.utils import import_object  # type: ignore
 
 
