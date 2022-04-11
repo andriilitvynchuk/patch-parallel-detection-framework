@@ -1,4 +1,6 @@
+import importlib
 import os
+from typing import Any, List
 
 from omegaconf import DictConfig
 from omegaconf.listconfig import ListConfig
@@ -32,3 +34,26 @@ def patch_relative_paths(cfg: DictConfig, original_cwd: str) -> DictConfig:
         if (value_type is DictConfig or value_type is dict) and len(value) > 0:
             cfg[key] = patch_relative_paths(value, original_cwd)
     return cfg
+
+
+def import_object(name: str) -> Any:
+    """
+    This function can import any Python object from path. Example:
+
+    timer_class = import_object("leiadlutils.general.Timer")
+    timer = timer_class()
+
+    or
+
+    timer = import_object("leiadlutils.general.Timer")()
+
+    """
+    components = name.split(".")
+    mod = importlib.import_module(".".join(components[:-1]))
+    return getattr(mod, components[-1])
+
+
+def import_objects(cfg: DictConfig) -> List[Any]:
+    # "or {}"" made for union of approaches on handling cases when params is None
+    objects = [import_object(obj.class_name)(**obj.params or {}) for obj in cfg.values()]
+    return objects

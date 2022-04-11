@@ -4,9 +4,7 @@ import cv2
 import numpy as np
 
 
-def nms(
-    bboxes: np.ndarray, iou_threshold: float, sigma: float = 0.3, method: str = "nms"
-) -> np.ndarray:
+def nms(bboxes: np.ndarray, iou_threshold: float, sigma: float = 0.3, method: str = "nms") -> np.ndarray:
     classes_in_img = list(set(bboxes[:, 5]))
     best_bboxes = []
 
@@ -15,12 +13,10 @@ def nms(
         cls_bboxes = bboxes[cls_mask]
 
         while len(cls_bboxes) > 0:
-            max_ind = np.argmax(cls_bboxes[:, 4])
+            max_ind = np.argmax(cls_bboxes[:, 4]).astype(int)
             best_bbox = cls_bboxes[max_ind]
             best_bboxes.append(best_bbox)
-            cls_bboxes = np.concatenate(
-                [cls_bboxes[:max_ind], cls_bboxes[max_ind + 1 :]]
-            )
+            cls_bboxes = np.concatenate([cls_bboxes[:max_ind], cls_bboxes[max_ind + 1 :]])
             iou = bboxes_iou(best_bbox[np.newaxis, :4], cls_bboxes[:, :4])
             weight = np.ones((len(iou),), dtype=np.float32)
 

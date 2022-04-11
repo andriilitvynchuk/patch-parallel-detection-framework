@@ -9,7 +9,7 @@ cameras:
   device: 0
 
 read_images_to_batch:
-  class: dronedet.utils.objects.stream_readers.opencv.MultithreadingOpencvStreamCapture
+  class: dronedet.objects.stream_readers.MultithreadingOpencvStreamCapture
   n_buffers: 3
 
 visualization:

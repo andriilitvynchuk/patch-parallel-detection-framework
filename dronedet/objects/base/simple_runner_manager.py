@@ -1,3 +1,4 @@
+# type: ignore
 import multiprocessing as mp
 import time
 from abc import abstractclassmethod
