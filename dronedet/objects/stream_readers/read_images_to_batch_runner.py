@@ -1,9 +1,9 @@
 # from os import read
 from typing import Any, Dict
 
-import shared_numpy as snp
 import torch
 
+import shared_numpy as snp
 from dronedet.eg_utils.eg_utils.helpers.config import import_object  # type: ignore
 from dronedet.utils.objects.base.simple_runner import SimpleRunner  # type: ignore
 
