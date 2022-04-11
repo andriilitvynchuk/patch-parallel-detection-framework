@@ -1,6 +1,7 @@
 from typing import Any, Dict, Union
 
 import numpy as np
+
 import shared_numpy as snp
 from shared_numpy.shared_numpy import SharedNDArray
 

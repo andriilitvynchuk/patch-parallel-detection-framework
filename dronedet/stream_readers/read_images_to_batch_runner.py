@@ -1,11 +1,10 @@
-# from os import read
 from typing import Any, Dict
 
-import shared_numpy as snp
 import torch
 
-from dronedet.eg_utils.eg_utils.helpers.config import import_object  # type: ignore
-from dronedet.utils.objects.base.simple_runner import SimpleRunner  # type: ignore
+import shared_numpy as snp
+from dronedet.base import SimpleRunner  # type: ignore
+from dronedet.utils import import_object  # type: ignore
 
 
 class ReadImagesToBatchRunner(SimpleRunner):

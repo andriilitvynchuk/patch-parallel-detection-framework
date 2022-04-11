@@ -7,8 +7,6 @@ import cv2
 import numpy as np
 import torch
 
-from dronedet.eg_utils.eg_utils.helpers.opencv import rotate_image
-
 
 def patch_video_path(video_path: str) -> Union[str, int]:
     if len(video_path) == 1:
@@ -33,7 +31,7 @@ class MultithreadingOpencvStreamCapture:
 
     def _load_cfg(self, config: Dict[str, Any]) -> None:
         self._name = config["name"]
-        self._url = config["url"]
+        self._url = config["path"]
         self._colorspace = config["colorspace"].upper()
         self._channel_order = config["channel_order"].upper()
         self._device = torch.device(config["device"])
@@ -44,15 +42,13 @@ class MultithreadingOpencvStreamCapture:
         self._reconnect_time: int = config.get("reconnect_time", 300)
 
     def _init_source(self) -> None:
-        self._source: cv2.VideoCapture = cv2.VideoCapture(patch_video_path(self._url))
+        self._source = cv2.VideoCapture(patch_video_path(self._url))
 
     def _process_image(self, image: np.ndarray) -> torch.Tensor:
         if self._height is not None and self._width is not None and image.shape[:2] != (self._height, self._width):
             image = cv2.resize(image, dsize=(self._width, self._height))
         if self._colorspace == "RGB":
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        if self._rotate is not None:
-            image = rotate_image(image=image, angle=self._rotate)
         image_tensor = torch.tensor(image)
         if self._channel_order == "CHW":
             image_tensor = image_tensor.permute(2, 0, 1)
@@ -67,7 +63,7 @@ class MultithreadingOpencvStreamCapture:
                 meta_information.update(dict(time=time.time(), success=True))
                 self._last_connection_time = meta_information["time"]
             else:
-                image = torch.zeros((3, self._height, self._width), torch.uint8, self._device)  # type: ignore
+                image = torch.zeros((3, self._height, self._width), dtype=torch.uint8, device=self._device)
                 if self._channel_order == "HWC":
                     image = image.permute(1, 2, 0)
                 meta_information.update(dict(time=time.time(), success=False))
