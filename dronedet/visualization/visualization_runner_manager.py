@@ -1,4 +1,3 @@
-import datetime
 import os
 from typing import Any, Dict, Optional
 
@@ -19,7 +18,7 @@ class VisualizationRunnerManager(SimpleRunnerManager):
 
     def _load_cfg(self, config: Dict[str, Any]) -> None:
         self._resize = config.get("resize")
-        self._save = config.get("save")
+        self._save = config["save"]
         self._verbose = config.get("verbose", True)
 
     def _load_global_cfg(self, config: Dict[str, Any]) -> None:
@@ -28,6 +27,20 @@ class VisualizationRunnerManager(SimpleRunnerManager):
     def _get_number_of_mini_runners(self) -> int:
         return len(self._cameras)
 
+    def _init_drawing_one_camera(self, camera_params: Dict[str, Any]) -> None:
+        camera_name = camera_params["name"]
+        self._writers[camera_name] = dict()
+
+        if self._save[camera_name].get("video") is None:
+            return
+
+        output_video = os.path.join(self._save[camera_name]["folder"], "video.mkv")
+        codec = cv2.VideoWriter_fourcc(*"XVID")
+        fps = self._save[camera_name]["video"].get("fps", 10)
+        width = camera_params["width"] if self._resize is None else self._resize[1]
+        height = camera_params["height"] if self._resize is None else self._resize[0]
+        self._writers[camera_name]["video"] = cv2.VideoWriter(output_video, codec, fps, (width, height), isColor=True)
+
     def _write_image(
         self,
         image: np.ndarray,
@@ -35,13 +48,8 @@ class VisualizationRunnerManager(SimpleRunnerManager):
         meta_information: Dict[str, Any],
     ) -> None:
         camera_name = self._cameras[camera_index]["name"]
-        file_name = datetime.datetime.fromtimestamp(meta_information["time"]).strftime("%Y-%m-%d_%H:%M:%S.%f.jpg")
-        cv2.imwrite(
-            os.path.join(self._writers[camera_name]["events_upper_not_safe_folder"], file_name),
-            image,
-        )
-        if self._writers[self._cameras[camera_index]["name"]].get("video") is not None:
-            self._writers[self._cameras[camera_index]["name"]]["video"].write(image)
+        if self._writers[camera_name].get("video") is not None:
+            self._writers[camera_name]["video"].write(image)
 
     def _init_run(self, camera_index: int) -> None:
         self._init_drawing_one_camera(camera_params=self._cameras[camera_index])
@@ -49,14 +57,11 @@ class VisualizationRunnerManager(SimpleRunnerManager):
     def _process(self, share_data: Dict[str, Any], camera_index: int) -> None:
         image = share_data["images_cpu"]
         meta_information = share_data["meta"]
-        split_screen = self._split_screen.get(self._cameras[camera_index]["name"])
         original_image = image.transpose(1, 2, 0)
         original_image = cv2.cvtColor(original_image, cv2.COLOR_RGB2BGR)
         debug_image = original_image.copy()
         if self._resize is not None:
             debug_image = cv2.resize(debug_image, dsize=(self._resize[1], self._resize[0]))
-
-        debug_image = self._visualize_split_screen(debug_image, split_screen)
 
         self._write_image(
             image=debug_image,

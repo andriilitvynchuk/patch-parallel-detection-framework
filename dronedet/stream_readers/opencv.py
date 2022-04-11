@@ -31,7 +31,7 @@ class MultithreadingOpencvStreamCapture:
 
     def _load_cfg(self, config: Dict[str, Any]) -> None:
         self._name = config["name"]
-        self._url = config["url"]
+        self._url = config["path"]
         self._colorspace = config["colorspace"].upper()
         self._channel_order = config["channel_order"].upper()
         self._device = torch.device(config["device"])
