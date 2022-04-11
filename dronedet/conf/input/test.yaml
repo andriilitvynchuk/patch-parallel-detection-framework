@@ -1,3 +1,21 @@
-path: path_to_my_video
-height: 736
-width: 1280
+cameras:
+  url: 'data/cam1_cut.mp4'
+  name: camera1
+  height: 736
+  width: 1280
+  framerate: every_frame
+  colorspace: RGB
+  channel_order: CHW
+  device: 0
+
+read_images_to_batch:
+  class: dronedet.utils.objects.stream_readers.opencv.MultithreadingOpencvStreamCapture
+  n_buffers: 3
+
+visualization:
+  resize: [540, 960]
+  save:
+    camera1:
+      folder: output_folder/baseline/camera1
+      video:
+        fps: 30
