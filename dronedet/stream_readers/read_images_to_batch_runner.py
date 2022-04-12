@@ -10,7 +10,6 @@ from dronedet.utils import import_object  # type: ignore
 class ReadImagesToBatchRunner(SimpleRunner):
     def __init__(self, config: Dict[str, Any], global_config: Dict[str, Any]):
         super().__init__()
-        self._vms = None
         self._load_cfg(config)
         self._load_global_cfg(global_config)
 
@@ -20,7 +19,7 @@ class ReadImagesToBatchRunner(SimpleRunner):
         self._verbose = config.get("verbose", True)
 
     def _load_global_cfg(self, config: Dict[str, Any]) -> None:
-        self._cameras = config["cameras"]
+        self._cameras = list(config["cameras"].values())  # cameras is list of dicts (e.g. video: {})
 
     def _init_sources(self) -> None:
         self._sources = [self._stream_reader_class(camera_params) for camera_params in self._cameras]

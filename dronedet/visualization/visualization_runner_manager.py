@@ -22,7 +22,7 @@ class VisualizationRunnerManager(SimpleRunnerManager):
         self._verbose = config.get("verbose", True)
 
     def _load_global_cfg(self, config: Dict[str, Any]) -> None:
-        self._cameras = config["cameras"]
+        self._cameras = list(config["cameras"].values())  # cameras is list of dicts (e.g. video: {})
 
     def _get_number_of_mini_runners(self) -> int:
         return len(self._cameras)

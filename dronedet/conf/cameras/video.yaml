@@ -1,4 +1,7 @@
-- path: data/videos/cam1_cut.mp4
+# if we want to use list of configs (cameras) in hydra we need to make each subconfig as key - value dict.
+# Key is unique for list of configs
+video:
+  path: data/videos/cam1_cut.mp4
   name: camera1
   height: 736
   width: 1280
