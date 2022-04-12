@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 import hydra
 import torch
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 
 from dronedet.base import SimplePipeline
 from dronedet.stream_readers import ReadImagesToBatchRunner
@@ -32,7 +32,8 @@ class DroneDetPipeline(SimplePipeline):
 
 
 def run(cfg: DictConfig) -> None:
-    pipeline = DroneDetPipeline(config=cfg["input"])
+    print(OmegaConf.to_yaml(cfg))
+    pipeline = DroneDetPipeline(config=cfg)  # type: ignore
     pipeline.connect_runners()
     pipeline.start()
     pipeline.join()

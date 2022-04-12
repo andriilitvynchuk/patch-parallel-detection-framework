@@ -1,0 +1,5 @@
+resize: [540, 960]
+save:
+  folder_path: logs
+  video:
+    fps: 30

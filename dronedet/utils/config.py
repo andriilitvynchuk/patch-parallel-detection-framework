@@ -1,6 +1,6 @@
 import importlib
 import os
-from typing import Any, List
+from typing import Any
 
 from omegaconf import DictConfig
 from omegaconf.listconfig import ListConfig
@@ -53,9 +53,3 @@ def import_object(name: str) -> Any:
     components = name.split(".")
     mod = importlib.import_module(".".join(components[:-1]))
     return getattr(mod, components[-1])
-
-
-def import_objects(cfg: DictConfig) -> List[Any]:
-    # "or {}"" made for union of approaches on handling cases when params is None
-    objects = [import_object(obj.class_name)(**obj.params or {}) for obj in cfg.values()]
-    return objects
