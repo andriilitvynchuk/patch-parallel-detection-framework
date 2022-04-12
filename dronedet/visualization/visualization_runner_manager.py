@@ -35,7 +35,7 @@ class VisualizationRunnerManager(SimpleRunnerManager):
             return
 
         output_video = os.path.join(self._save["folder_path"], camera_name, "video.mkv")
-        os.makedirs(os.path.dirname(output_video))
+        os.makedirs(os.path.dirname(output_video), exist_ok=True)
         codec = cv2.VideoWriter_fourcc(*"XVID")
         fps = self._save["video"].get("fps", 10)
         width = camera_params["width"] if self._resize is None else self._resize[1]
@@ -49,7 +49,7 @@ class VisualizationRunnerManager(SimpleRunnerManager):
         meta_information: Dict[str, Any],
     ) -> None:
         camera_name = self._cameras[camera_index]["name"]
-        if self._writers.get("video") is not None:
+        if self._writers[camera_name].get("video") is not None:
             self._writers[camera_name]["video"].write(image)
 
     def _init_run(self, camera_index: int) -> None:
