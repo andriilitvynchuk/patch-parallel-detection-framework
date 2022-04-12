@@ -1,6 +1,5 @@
 resize: [540, 960]
 save:
-  camera1:
-    folder_path: logs
-    video:
-      fps: 30
+  folder_path: logs
+  video:
+    fps: 30
