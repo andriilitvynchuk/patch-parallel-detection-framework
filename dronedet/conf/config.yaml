@@ -1,6 +1,8 @@
 defaults:
   - _self_
-  - input: test
+  - cameras: video
+  - read_images_to_batch: opencv
+  - visualization: default
 
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog
