@@ -17,6 +17,7 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements-dev.txt
+          cd shared_numpy && python setup.py build_ext --inplace && pip install -e . && cd ..
           pip install -e .
 
       - name: Run tests
