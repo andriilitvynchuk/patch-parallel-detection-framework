@@ -23,7 +23,8 @@ def logs_folder(custom_tmp_path: Path) -> Path:
 def video(custom_tmp_path: Path) -> Path:
     video_path = custom_tmp_path / "video.mkv"
     width, height = 1280, 720
-    video_writer = cv2.VideoWriter(str(video_path), cv2.VideoWriter_fourcc(*"XVID"), 30, (1280, 720), isColor=True)
+    codec = cv2.VideoWriter_fourcc(*"XVID")
+    video_writer = cv2.VideoWriter(str(video_path), codec, 30, (width, height), isColor=True)
     number_of_frames = 150
     for index in range(number_of_frames):
         sample = np.random.randint(0, 255, size=(height, width, 3), dtype=np.uint8)
