@@ -1,7 +1,6 @@
 from typing import Any, Dict
 
 import hydra
-import torch
 from omegaconf import DictConfig, OmegaConf
 
 from dronedet.base import SimplePipeline
@@ -48,5 +47,4 @@ def main(cfg: DictConfig) -> None:
 
 
 if __name__ == "__main__":
-    torch.multiprocessing.set_start_method("spawn")
     main()
