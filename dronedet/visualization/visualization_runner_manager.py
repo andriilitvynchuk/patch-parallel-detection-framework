@@ -7,9 +7,6 @@ import numpy as np
 from dronedet.base import SimpleRunnerManager  # type: ignore
 
 
-# from dronedet.utils import close_dict, unlink_dict  # type: ignore
-
-
 class VisualizationRunnerManager(SimpleRunnerManager):
     def __init__(self, config: Dict[str, Any], global_config: Dict[str, Any], name: Optional[str] = None):
         super().__init__(name)
@@ -54,7 +51,5 @@ class VisualizationRunnerManager(SimpleRunnerManager):
         if self._resize is not None:
             debug_image = cv2.resize(debug_image, dsize=(self._resize[1], self._resize[0]))
         self._write_image(image=debug_image)
-        shm.unlink()
         # it is final Runner, delete shared memory
-
-        # close_dict(share_data)
+        shm.unlink()
