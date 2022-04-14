@@ -5,14 +5,14 @@ def crop_n_parts(tensor: torch.Tensor, n_crops: int = 4) -> torch.Tensor:
     """
     Split image into N crops.
     Input:
-        tensor: tensor with shape [B, C, H, W]
+        tensor: tensor with shape [B, ..., H, W]
         n_crops: int which must be square of int (1, 4, 9, ...)
     Output:
-        tensor with shape [B, n_crops, C, H_new, W_new]
+        tensor with shape [B, n_crops, ..., C, H // n_crops ** 0.5, W_new // n_crops ** 0.5]
 
     TODO: add overlappings on edges
     """
-    _, _, height, width = tensor.shape
+    height, width = tensor.size(-2), tensor.size(-1)
     n_splits_by_side = n_crops**0.5
     if not n_splits_by_side.is_integer():
         raise ValueError("Currently, n_crops should be square of a whole number")
