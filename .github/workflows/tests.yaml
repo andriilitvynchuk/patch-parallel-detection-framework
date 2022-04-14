@@ -8,19 +8,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.8
 
       - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install -r requirements-dev.txt
-          cd shared_numpy && python setup.py build_ext --inplace && pip install -e . && cd ..
           pip install -e .
 
       - name: Run tests
