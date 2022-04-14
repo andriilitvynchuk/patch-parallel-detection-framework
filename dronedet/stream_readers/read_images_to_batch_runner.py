@@ -16,6 +16,7 @@ class ReadImagesToBatchRunner(SimpleRunner):
     def _load_cfg(self, config: Dict[str, Any]) -> None:
         self._stream_reader_class = import_object(config["class"])
         self._n_buffers = config["n_buffers"]
+        self._n_crops = config["n_crops"]
         self._verbose = config.get("verbose", True)
 
     def _load_global_cfg(self, config: Dict[str, Any]) -> None:

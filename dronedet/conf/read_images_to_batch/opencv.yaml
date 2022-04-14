@@ -1,2 +1,3 @@
 class: dronedet.stream_readers.MultithreadingOpencvStreamCapture
 n_buffers: 3
+n_crops: 4
