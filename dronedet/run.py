@@ -1,3 +1,4 @@
+import multiprocessing
 from typing import Any, Dict
 
 import hydra
@@ -47,4 +48,5 @@ def main(cfg: DictConfig) -> None:
 
 
 if __name__ == "__main__":
+    multiprocessing.set_start_method("fork")
     main()

@@ -2,9 +2,8 @@ from typing import Any, Dict
 
 import torch
 
-import shared_numpy as snp
 from dronedet.base import SimpleRunner
-from dronedet.utils import crop_n_parts, import_object
+from dronedet.utils import create_shared_array, crop_n_parts, import_object
 
 
 class ReadImagesToBatchRunner(SimpleRunner):
@@ -42,7 +41,7 @@ class ReadImagesToBatchRunner(SimpleRunner):
         # get images from streams in GPU
         read_list = [source.read() for source in self._sources]
         # add copy of images on CPU in shared memory
-        share_data["images_cpu"] = [snp.from_array(image.cpu().numpy()) for (image, _) in read_list]
+        share_data["images_cpu"] = [create_shared_array(image.cpu().numpy()) for (image, _) in read_list]
 
         # TODO: check if we need buffers at all
         batch_tensor = self._image_buffers[len(self._timers["main_work_time"]) % self._n_buffers]

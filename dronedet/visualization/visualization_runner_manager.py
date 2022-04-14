@@ -5,7 +5,9 @@ import cv2
 import numpy as np
 
 from dronedet.base import SimpleRunnerManager  # type: ignore
-from dronedet.utils import unlink_dict  # type: ignore
+
+
+# from dronedet.utils import close_dict, unlink_dict  # type: ignore
 
 
 class VisualizationRunnerManager(SimpleRunnerManager):
@@ -47,10 +49,12 @@ class VisualizationRunnerManager(SimpleRunnerManager):
         self._init_drawing(camera_index)
 
     def _process(self, share_data: Dict[str, Any], camera_index: int) -> None:
-        image = share_data["images_cpu"]
+        image, shm = share_data["images_cpu"]
         debug_image = cv2.cvtColor(image.transpose(1, 2, 0), cv2.COLOR_RGB2BGR)
         if self._resize is not None:
             debug_image = cv2.resize(debug_image, dsize=(self._resize[1], self._resize[0]))
         self._write_image(image=debug_image)
+        shm.unlink()
         # it is final Runner, delete shared memory
-        unlink_dict(share_data)
+
+        # close_dict(share_data)
