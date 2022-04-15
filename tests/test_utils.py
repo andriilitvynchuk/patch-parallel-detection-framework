@@ -11,9 +11,16 @@ def batch() -> torch.Tensor:
 
 @pytest.mark.parametrize("n_crops", [1, 4])
 def test_crop_n_parts(batch: torch.Tensor, n_crops: int) -> None:
-    result = crop_n_parts(batch, n_crops=n_crops)
+    result, meta = crop_n_parts(batch, n_crops=n_crops)
     b, c, h, w = batch.shape
     assert result.shape == (b, n_crops, c, h // (int(n_crops**0.5)), w // (int(n_crops**0.5)))
+
+    reconstruct = torch.zeros_like(batch)
+    for index, crop_meta in enumerate(meta):
+        reconstruct[
+            ..., crop_meta.height_start : crop_meta.height_end, crop_meta.width_start : crop_meta.width_end
+        ] = result[:, index]
+    assert (batch == reconstruct).all()
 
 
 @pytest.mark.parametrize("n_crops", [2, 9])
