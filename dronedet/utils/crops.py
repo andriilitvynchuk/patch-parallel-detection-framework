@@ -71,6 +71,6 @@ def crop_n_parts(
         width_value, end_width_value = modify_with_overlap(
             width_value, end_width_value, width_index, n_splits_by_side, overlap_width
         )
-        results.append(tensor[..., height_value:end_height_value, width_value:end_width_value])  # type: ignore
+        results.append(tensor[..., height_value:end_height_value, width_value:end_width_value])
         meta.append(CropMeta(height_value, width_value, end_height_value, end_width_value))
     return torch.stack(results, dim=1), meta
