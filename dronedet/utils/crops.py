@@ -21,7 +21,6 @@ def modify_with_overlap(begin: int, end: int, current_index: int, total_indexes:
         end += overlap // 2
     else:
         begin -= overlap
-    print(current_index, begin, end)
     return begin, end
 
 
