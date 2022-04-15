@@ -6,7 +6,7 @@ import torch
 
 
 @dataclass
-class CropInfo:
+class CropMeta:
     height_start: int
     width_start: int
     height_end: int
@@ -30,7 +30,7 @@ def calculate_overlap_value(side: int, overlap_percent: float) -> int:
 
 def crop_n_parts(
     tensor: torch.Tensor, n_crops: int = 4, overlap_percent: float = 0.1
-) -> Tuple[torch.Tensor, List[CropInfo]]:
+) -> Tuple[torch.Tensor, List[CropMeta]]:
     """
     Split image into N crops.
     Input:
@@ -39,7 +39,7 @@ def crop_n_parts(
         overlap_percent: float (percent of image)
     Output:
         tensor with shape [B, n_crops, ..., C, H // n_crops ** 0.5, W_new // n_crops ** 0.5]
-        meta: List[CropInfo]], can be used for original image reconstruction (example in test)
+        meta: List[CropMeta]], can be used for original image reconstruction (example in test)
 
     """
     height, width = tensor.size(-2), tensor.size(-1)
@@ -72,5 +72,5 @@ def crop_n_parts(
             width_value, end_width_value, width_index, n_splits_by_side, overlap_width
         )
         results.append(tensor[..., height_value:end_height_value, width_value:end_width_value])  # type: ignore
-        meta.append(CropInfo(height_value, width_value, end_height_value, end_width_value))
+        meta.append(CropMeta(height_value, width_value, end_height_value, end_width_value))
     return torch.stack(results, dim=1), meta
