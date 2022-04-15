@@ -44,11 +44,13 @@ class ReadImagesToBatchRunner(SimpleRunner):
         # add copy of images on CPU in shared memory
         share_data["images_cpu"] = [snp.from_array(image.cpu().numpy()) for (image, _) in read_list]
 
-        batch_tensor = self._image_buffers[len(self._timers["main_work_time"]) % self._n_buffers]
+        share_data["images_gpu"] = self._image_buffers[len(self._timers["main_work_time"]) % self._n_buffers]
+        share_data["crop_meta"] = []
         # memory is already allocated, just copy
         for index, (image, _) in enumerate(read_list):
-            batch_tensor[index] = crop_n_parts(image.unsqueeze(0), n_crops=self._n_crops)[0]
-        share_data["images_gpu"] = batch_tensor
+            cropped_image, meta = crop_n_parts(image.unsqueeze(0), n_crops=self._n_crops)
+            share_data["images_gpu"][index] = cropped_image[0]  # cropped image has shape [1, N_crops, 3, H, W]
+            share_data["crop_meta"].append(meta)
 
         share_data["meta"] = [camera_meta for (_, camera_meta) in read_list]
         # if all cameras crashed - close pipeline

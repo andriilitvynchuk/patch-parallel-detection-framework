@@ -1,7 +1,19 @@
+from dataclasses import dataclass
+from itertools import product
+from typing import List, Tuple
+
 import torch
 
 
-def crop_n_parts(tensor: torch.Tensor, n_crops: int = 4) -> torch.Tensor:
+@dataclass
+class CropInfo:
+    height_start: int
+    width_start: int
+    height_end: int
+    width_end: int
+
+
+def crop_n_parts(tensor: torch.Tensor, n_crops: int = 4) -> Tuple[torch.Tensor, List[CropInfo]]:
     """
     Split image into N crops.
     Input:
@@ -9,6 +21,7 @@ def crop_n_parts(tensor: torch.Tensor, n_crops: int = 4) -> torch.Tensor:
         n_crops: int which must be square of int (1, 4, 9, ...)
     Output:
         tensor with shape [B, n_crops, ..., C, H // n_crops ** 0.5, W_new // n_crops ** 0.5]
+        meta:
 
     TODO: add overlappings on edges
     """
@@ -26,11 +39,12 @@ def crop_n_parts(tensor: torch.Tensor, n_crops: int = 4) -> torch.Tensor:
     height_linspace = torch.linspace(0, height, steps=n_splits_by_side + 1, dtype=torch.int)
     width_linspace = torch.linspace(0, width, steps=n_splits_by_side + 1, dtype=torch.int)
     results = []
-    for height_index in range(len(height_linspace[:-1])):
-        for width_index in range(len((width_linspace[:-1]))):
-            height_value = height_linspace[height_index]
-            end_height_value = height_linspace[height_index + 1]
-            width_value = width_linspace[width_index]
-            end_width_value = width_linspace[width_index + 1]
-            results.append(tensor[..., height_value:end_height_value, width_value:end_width_value])  # type: ignore
-    return torch.stack(results, dim=1)
+    meta = []
+    for height_index, width_index in product(range(len(height_linspace[:-1])), range(len((width_linspace[:-1])))):
+        height_value = int(height_linspace[height_index])
+        end_height_value = int(height_linspace[height_index + 1])
+        width_value = int(width_linspace[width_index])
+        end_width_value = int(width_linspace[width_index + 1])
+        results.append(tensor[..., height_value:end_height_value, width_value:end_width_value])  # type: ignore
+        meta.append(CropInfo(height_value, width_value, end_height_value, end_width_value))
+    return torch.stack(results, dim=1), meta
