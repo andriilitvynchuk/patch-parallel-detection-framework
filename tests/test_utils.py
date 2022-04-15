@@ -25,7 +25,7 @@ def test_crop_n_parts(batch: torch.Tensor, n_crops: int, overlap_percent: float)
     assert (batch == reconstruct).all()
 
 
-@pytest.mark.parametrize("n_crops", [2, 9])
-def test_crop_n_parts_erros(batch: torch.Tensor, n_crops: int) -> None:
+@pytest.mark.parametrize("n_crops,overlap_percent", [(2, 0.2), (9, 0.2), (4, 0.6)])
+def test_crop_n_parts_erros(batch: torch.Tensor, n_crops: int, overlap_percent: float) -> None:
     with pytest.raises(ValueError):
-        crop_n_parts(batch, n_crops=n_crops)
+        crop_n_parts(batch, n_crops=n_crops, overlap_percent=overlap_percent)

@@ -17,10 +17,10 @@ def modify_with_overlap(begin: int, end: int, current_index: int, total_indexes:
     if current_index == 0:
         end += overlap
     elif 0 < current_index < total_indexes - 1:
-        begin -= overlap // 2
+        begin = max(begin - overlap // 2, 0)
         end += overlap // 2
     else:
-        begin -= overlap
+        begin = max(begin - overlap, 0)
     return begin, end
 
 
@@ -52,6 +52,8 @@ def crop_n_parts(
         raise ValueError(
             f"Cannot divide image into {n_crops} parts, height or width is not divisible by {n_splits_by_side}"
         )
+    if not (0 <= overlap_percent <= 1 / n_splits_by_side):
+        raise ValueError(f"Overlap value should be in [0, {( 1 / n_splits_by_side):.2f} range]")
     overlap_height = calculate_overlap_value(height, overlap_percent)
     overlap_width = calculate_overlap_value(width, overlap_percent)
     height_linspace = torch.linspace(0, height, steps=n_splits_by_side + 1, dtype=torch.int)
