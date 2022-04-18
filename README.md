@@ -12,7 +12,7 @@ Still, you need install [shared_numpy](https://github.com/dillonalaird/shared_nu
 
 For development:
 ```
-git clone https://github.com/yehor-morylov/drone_detection_inference_logic.git && cd drone_detection_inference_logic
+git clone --recursive https://github.com/yehor-morylov/drone_detection_inference_logic.git && cd drone_detection_inference_logic
 cd shared_numpy && python setup.py build_ext --inplace && pip install -e . && cd ..
 pip install -e .
 ```
