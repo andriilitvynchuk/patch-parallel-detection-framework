@@ -55,14 +55,13 @@ class SimpleDeepModel:
         self._input_size = (config["resize"]["height"], config["resize"]["width"], 3) if self._need_resize else None
 
         self._need_norm = config["normalize"] is not None
+        self._norm_mean, self._norm_std, self._norm_device = None, None, None
         if self._need_norm:
             self._norm_device = torch.device(config["normalize"]["device"])
             self._norm_mean = torch.tensor(config["normalize"].get("mean", [0.485, 0.456, 0.406]))
             self._norm_mean = 255 * self._norm_mean.to(self._norm_device).to(self._precision).view(1, 3, 1, 1)
             self._norm_std = torch.tensor(config["normalize"].get("std", [0.229, 0.224, 0.225]))
             self._norm_std = 255 * self._norm_std.to(self._norm_device).to(self._precision).view(1, 3, 1, 1)
-        else:
-            self._norm_mean, self._norm_std, self._norm_device = None, None, None
 
     @abstractmethod
     def _load_model(self) -> None:
@@ -72,14 +71,13 @@ class SimpleDeepModel:
     def _warmup(self) -> None:
         if self._input_size is not None:
             print("Warming up ... ")
-            check_array = np.random.uniform(size=(1, *self._input_size)).astype(np.float32)
-            self.forward_batch(check_array)
+            check_array = np.random.randint(0, 255, size=(1, *self._input_size)).astype(np.uint8)
+            self.forward_batch(check_array)  # type: ignore
             print("Done")
 
     def _cpu_image_preprocess(self, image: np.ndarray) -> np.ndarray:
         if self._need_resize and (image.shape != self._input_size):
-            if self._input_size is not None:
-                image = cv2.resize(image, dsize=(self._input_size[1], self._input_size[0]))
+            image = cv2.resize(image, dsize=(self._input_size[1], self._input_size[0]))  # type: ignore
         if self._colorspace == "BGR":
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         return image
