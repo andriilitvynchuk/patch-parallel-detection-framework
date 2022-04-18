@@ -2,7 +2,7 @@ defaults:
   - _self_
   - cameras:
       - video
-  - read_images_to_batch: opencv
+  - read_images: opencv
   - visualization: default
 
   - override hydra/hydra_logging: colorlog

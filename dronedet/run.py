@@ -11,9 +11,7 @@ from dronedet.visualization import VisualizationRunnerManager
 
 class DroneDetPipeline(SimplePipeline):
     def __init__(self, config: Dict[str, Any]):
-        self.read_images_to_batch_runner = ReadImagesToBatchRunner(
-            config=config["read_images_to_batch"], global_config=config
-        )
+        self.read_images_to_batch_runner = ReadImagesToBatchRunner(config=config["read_images"], global_config=config)
         self.visualization_runner_manager = VisualizationRunnerManager(
             config=config["visualization"], global_config=config
         )
