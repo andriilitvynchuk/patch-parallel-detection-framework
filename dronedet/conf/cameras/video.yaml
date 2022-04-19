@@ -8,4 +8,4 @@ video:
   framerate: every_frame
   colorspace: RGB
   channel_order: CHW
-  device: cpu
+  device: ${detector.params.device}

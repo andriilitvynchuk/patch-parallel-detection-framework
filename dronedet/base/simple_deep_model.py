@@ -52,7 +52,7 @@ class SimpleDeepModel:
         self._colorspace = config["colorspace"]
 
         self._need_resize = config["resize"] is not None
-        self._input_size = (config["resize"]["height"], config["resize"]["width"], 3) if self._need_resize else None
+        self._input_size = (config["resize"]["height"], config["resize"]["width"]) if self._need_resize else None
 
         self._need_norm = config["normalize"] is not None
         self._norm_mean, self._norm_std, self._norm_device = None, None, None
@@ -71,7 +71,7 @@ class SimpleDeepModel:
     def _warmup(self) -> None:
         if self._input_size is not None:
             print("Warming up ... ")
-            check_array = np.random.randint(0, 255, size=(1, *self._input_size)).astype(np.uint8)
+            check_array = np.random.randint(0, 255, size=(1, 3, *self._input_size[:2])).astype(np.uint8)
             self.forward_batch(check_array)  # type: ignore
             print("Done")
 

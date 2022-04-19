@@ -25,10 +25,11 @@ class DetectionBatchRunner(SimpleRunner):
         self._cameras = list(config["cameras"].values())  # cameras is list of dicts (e.g. video: {})
 
     def _init_run(self) -> None:
-        self._model = self._model_class(self._config["class_params"])
+        self._model = self._model_class(self._config["params"])
 
     def _process(self, share_data: Dict[str, Any]) -> Dict[str, Any]:
-        batch_tensor = share_data["images_gpu"]
+        batch_tensor = share_data["images_gpu"]  # size is [B, N_crops, 3, H_new, W_new]
+        batch_tensor = batch_tensor.view(-1, *batch_tensor.shape[2:])  # size is [B * N_crops, 3, H_new, W_new]
         meta = share_data["meta"]
 
         leave_images_for_model = [

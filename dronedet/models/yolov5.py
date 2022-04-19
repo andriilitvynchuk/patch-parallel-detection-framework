@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Dict, List
 
 import numpy as np
 import torch
@@ -6,10 +6,12 @@ import torch
 from dronedet.base.simple_deep_model import SimpleDeepModel
 from dronedet.utils import non_max_suppression
 
-from .yolov5.models.common import DetectMultiBackend
-from .yolov5.utils.augmentations import letterbox
-from .yolov5.utils.general import scale_coords
-from .yolov5.utils.torch_utils import select_device
+
+# from .yolov5.models.common import DetectMultiBackend
+
+
+# from .yolov5.utils.augmentations import letterbox
+# from .yolov5.utils.general import scale_coords
 
 
 class Yolov5Detector(SimpleDeepModel):
@@ -18,90 +20,93 @@ class Yolov5Detector(SimpleDeepModel):
         self._load_model()
 
     def _load_cfg(self, config: Dict[str, Any]) -> None:
-        self._weights = config["weights"]
-        self._device = select_device(config["device"])
-        self._half = config["half"]  # use FP16 half-precision inference
-        self._half &= self._device.type != "cpu"  # half precision only supported on CUDA
-        self._input_size = config["input_size"]  # inference size h, w
+        super()._load_cfg(config)
         self._nms_conf_thres = config["nms_conf_thres"]  # confidence threshold
         self._iou_thres = config["iou_thres"]  # NMS IOU threshold
         self._iou_thres_post = config["iou_thres_post"]
         self._max_det = config["max_det"]  # maximum detections per image
         self._classes = config["classes"]  # filter by class: --class 0, or --class 0 2 3
         self._agnostic_nms = config["agnostic_nms"]  # class-agnostic NMS
-        self._augment = config["augment"]  # augmented inference
         self._classify = config["classify"]  # False
         self._stride = config["stride"]
-        self._auto_letterbox = config["auto_letterbox"]
 
     def _load_model(self) -> None:
-        # Load model
-        self._model = DetectMultiBackend(self._weights, device=self._device)
-
-        pt, jit, onnx, engine = self._model.pt, self._model.jit, self._model.onnx, self._model.engine
-
-        # Half
-        self._half &= (
-            pt or jit or onnx or engine
-        ) and self._device.type != "cpu"  # FP16 supported on limited backends with CUDA
-        if pt or jit:
-            self._model.model.half() if self._half else self._model.model.float()
-
+        self._model = torch.jit.load(self._model_path)
         self._warmup()
 
     def _warmup(self) -> None:
         if self._input_size is not None:
-            self._model.warmup(imgsz=(1, 3, self._input_size[0], self._input_size[1]))
-        else:
-            self._model.warmup()
+            print("Warming up ... ")
+            check_array = torch.randn(1, 3, *self._input_size[:2])
+            self.forward_batch(check_array)
+            print("Done")
 
-    def _preprocess(self, img0: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Args:
-            img: 3-dimentional image in BGR format
-        """
+    def _gpu_preprocess(self, images: torch.Tensor) -> torch.Tensor:  # type: ignore
+        batch = images.to(self._precision)
+        if self._need_resize:
+            batch = torch.nn.functional.interpolate(batch, size=self._input_size, mode="nearest")
+        if self._need_norm:
+            batch = (batch.to(self._norm_device) - self._norm_mean) / self._norm_std
+        return batch.to(self._device)
 
-        # Padded resize
-        img = letterbox(img0, self._input_size, stride=self._stride, auto=self._auto_letterbox)[0]
+    def _preprocess_batch(self, batch: torch.Tensor) -> torch.Tensor:  # type: ignore
+        gpu_preprocessed_images = self._gpu_preprocess(images=batch)
+        return gpu_preprocessed_images
 
-        # Convert
-        img = img.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
-        img = np.ascontiguousarray(img)
+    # def _warmup(self) -> None:
+    #     if self._input_size is not None:
+    #         self._model.warmup(imgsz=(1, 3, self._input_size[0], self._input_size[1]))
+    #     else:
+    #     x    self._model.warmup()
 
-        im, im0s = img, img0
+    # def _preprocess(self, img0: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    #     """
+    #     Args:
+    #         img: 3-dimentional image in BGR format
+    #     """
 
-        im = torch.from_numpy(im).to(self._device)
-        im = im.half() if self._half else im.float()  # uint8 to fp16/32
-        im /= 255  # 0 - 255 to 0.0 - 1.0
-        if len(im.shape) == 3:
-            im = im[None]  # expand for batch dim
+    #     # Padded resize
+    #     # img = letterbox(img0, self._input_size, stride=self._stride, auto=self._auto_letterbox)[0]
+    #     img =
 
-        return im, im0s
+    #     # Convert
+    #     img = img.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
+    #     img = np.ascontiguousarray(img)
 
-    @staticmethod
-    def _postprocess_detections(pred: Sequence, im: np.ndarray, im0s: np.ndarray) -> List[List]:
-        detections = list()
-        for i, det in enumerate(pred):
-            result = list()
-            if len(det):
-                # Rescale boxes from img_size to im0 size
-                det[:, :4] = scale_coords(im.shape[2:], det[:, :4], im0s.shape).round()
+    #     im, im0s = img, img0
 
-                for *xyxy, conf, cls in reversed(det.cpu().numpy()):
-                    x1, y1, x2, y2 = xyxy
-                    result.append([x1, y1, x2, y2, conf, cls])
+    #     im = torch.from_numpy(im).to(self._device)
+    #     im = im.half() if self._half else im.float()  # uint8 to fp16/32
+    #     im /= 255  # 0 - 255 to 0.0 - 1.0
+    #     if len(im.shape) == 3:
+    #         im = im[None]  # expand for batch dim
 
-            detections.append(result)
-        return detections
+    #     return im, im0s
 
-    def forward_batch(self, batch: Sequence[np.ndarray], *args: Any, **kwargs: Any) -> np.ndarray:
-        # TODO: implement batch inference
-        output = list()
-        for img in batch:
-            output.append(self.forward_image(img))
-        return np.array(output)
+    # @staticmethod
+    # def _postprocess_detections(pred: Sequence, im: np.ndarray, im0s: np.ndarray) -> List[List]:
+    #     detections = list()
+    #     for i, det in enumerate(pred):
+    #         result = list()
+    #         if len(det):
+    #             # Rescale boxes from img_size to im0 size
+    #             det[:, :4] = scale_coords(im.shape[2:], det[:, :4], im0s.shape).round()
 
-    def forward_image(self, img: np.ndarray) -> List[np.ndarray]:
+    #             for *xyxy, conf, cls in reversed(det.cpu().numpy()):
+    #                 x1, y1, x2, y2 = xyxy
+    #                 result.append([x1, y1, x2, y2, conf, cls])
+
+    #         detections.append(result)
+    #     return detections
+
+    def forward_batch(self, batch: torch.Tensor) -> np.ndarray:
+        with torch.no_grad():
+            preprocessed_input = self._preprocess_batch(batch)
+            print(preprocessed_input.size())
+            (results,) = self._model(preprocessed_input)
+            print(results.size())
+
+    def forward_image(self, image: torch.Tensor) -> List[np.ndarray]:
         """
         returns: [[x, y, w, h, conf, cls], ...]
         """

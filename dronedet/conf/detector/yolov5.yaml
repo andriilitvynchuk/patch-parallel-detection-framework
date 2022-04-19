@@ -1,17 +1,24 @@
 class: dronedet.models.Yolov5Detector
 params:
-  weights_path: path_to_model.pth
+  model_path: dronedet/models/weights/yolov5_v00_1280x1280_8class_jit.pth
+  precision: FP32 # FP16 or FP32
   device: cpu # cuda device, i.e. 0 or 0,1,2,3 or cpu
-  input_size: [1280, 1280] # inference size h,w
+  preprocessing:
+    colorspace: RGB
+    resize:
+      height: 1280
+      width: 1280
+    normalize:
+      device: ${detector.params.device}
+      mean: [0, 0, 0]
+      std: [1, 1, 1]
   nms_conf_thres: 0.44 # confidence threshold
   iou_thres: 0.3 # NMS IOU threshold
   iou_thres_post: 0.8
   max_det: 1000 # maximum detections per image
   classes: null # filter by class: --class 0, or --class 0 2 3
   agnostic_nms: False # class-agnostic NMS
-  augment: False # augmented inference
-  half: False # use FP16 half-precision inference
   classify: False # False
   suffixes: [".pt", ".onnx"]
   stride: 32
-  auto_letterbox: false
+  output_size: [736, 1280]
