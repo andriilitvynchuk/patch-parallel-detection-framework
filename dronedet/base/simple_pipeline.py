@@ -1,6 +1,5 @@
+import sys
 from abc import abstractclassmethod
-
-from .simple_runner import SimpleRunner
 
 
 # this class is created for combining all Runners in one place
@@ -10,28 +9,16 @@ from .simple_runner import SimpleRunner
 
 
 class SimplePipeline:
-    def _recursive_start(self, runner: SimpleRunner) -> None:
-        runner.start()
-        for child in runner.children.values():
-            child_instance = child["cls"]
-            if not child_instance.is_running:
-                self._recursive_start(child_instance)
-
-    def _recursive_join(self, runner: SimpleRunner) -> None:
-        try:
-            runner.join()
-            for child in runner.children:
-                self._recursive_join(child)
-        except TypeError:
-            print("Terminated")
-
-    @abstractclassmethod
     def start(self) -> None:
-        raise NotImplementedError
+        for runner in vars(self).values():
+            runner.start()
 
-    @abstractclassmethod
     def join(self) -> None:
-        raise NotImplementedError
+        producer_runners = [runner for runner in vars(self).values() if len(runner.parents) == 0]
+        for runner in producer_runners:
+            runner.join()
+            # if we joined then producer is closed. TODO: do it better
+            sys.exit()
 
     @abstractclassmethod
     def connect_runners(self) -> None:

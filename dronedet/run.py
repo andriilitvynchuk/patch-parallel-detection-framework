@@ -1,3 +1,4 @@
+import multiprocessing
 from typing import Any, Dict
 
 import hydra
@@ -23,12 +24,6 @@ class DroneDetPipeline(SimplePipeline):
             unbatch_keys=["images_cpu", "bboxes", "meta"],
         )
 
-    def start(self) -> None:
-        self._recursive_start(self.read_images_to_batch_runner)
-
-    def join(self) -> None:
-        self._recursive_join(self.read_images_to_batch_runner)
-
 
 def run(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
@@ -47,4 +42,5 @@ def main(cfg: DictConfig) -> None:
 
 
 if __name__ == "__main__":
+    multiprocessing.set_start_method("spawn")
     main()

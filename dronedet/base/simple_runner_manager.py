@@ -26,12 +26,13 @@ class SimpleRunnerManager(SimpleRunner):
         raise NotImplementedError
 
     def start(self) -> None:
-        self._proc_list: List[mp.Process] = [
+        proc_list: List[mp.Process] = [
             mp.Process(target=partial(self._run, camera_index=index), daemon=True)
             for index in range(self._get_number_of_mini_runners())
         ]
-        for process in self._proc_list:
-            process.start()
+        for process in proc_list:
+            process.start()  # it needs to start without having self._proc_list
+        self._proc_list = proc_list
         self._is_running.value = True
 
     def join(self) -> None:
@@ -41,13 +42,15 @@ class SimpleRunnerManager(SimpleRunner):
     def _create_connector(self, parent_class: "SimpleRunner") -> List[mp.Queue]:
         return [mp.Queue(1) for _ in range(self._get_number_of_mini_runners())]
 
-    def _unbatch(self, data: Sequence[Any], index: int) -> Any:
+    @staticmethod
+    def unbatch(data: Sequence[Any], index: int) -> Any:
         unbatched_data = data[index]
         if type(unbatched_data) is torch.Tensor and unbatched_data.device.type != "cpu":
             unbatched_data = unbatched_data.cpu()
         return unbatched_data
 
-    def send_data_to_connector(self, share_data: Dict[str, Any], connector: List[mp.Queue], **kwargs: Any) -> None:
+    @staticmethod
+    def send_data_to_connector(share_data: Dict[str, Any], connector: List[mp.Queue], **kwargs: Any) -> None:
         camera_index = kwargs.get("camera_index")
         if camera_index is not None:
             camera_connector = connector[camera_index]
@@ -58,7 +61,7 @@ class SimpleRunnerManager(SimpleRunner):
                 camera_share_data = dict()
                 for key, value in share_data.items():
                     if unbatch_keys is not None and key in unbatch_keys:
-                        camera_share_data[key] = self._unbatch(data=value, index=index)
+                        camera_share_data[key] = SimpleRunnerManager.unbatch(data=value, index=index)
                     else:
                         camera_share_data[key] = value
                 camera_connector.put(camera_share_data)
