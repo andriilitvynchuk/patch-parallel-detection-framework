@@ -66,8 +66,9 @@ class SimpleRunner:
         else:
             return [mp.Queue(1) for _ in range(parent_class._get_number_of_mini_runners())]
 
+    @staticmethod
     def send_data_to_connector(
-        self, share_data: Dict[str, Any], connector: Union[mp.Queue, List[mp.Queue]], **kwargs: Any
+        share_data: Dict[str, Any], connector: Union[mp.Queue, List[mp.Queue]], **kwargs: Any
     ) -> None:
         """
         Previous runner(parent) used to send data to child (method belongs to child).
@@ -96,7 +97,10 @@ class SimpleRunner:
         """
         connector = child_class.add_parent(parent_class=self, share_connector_with=share_connector_with)
         self._children[child_class.name] = dict(
-            cls=child_class, connector=connector, dict_keys=dict_keys, pipeline_sending_kwargs=kwargs
+            send_data_method=child_class.send_data_to_connector,
+            connector=connector,
+            dict_keys=dict_keys,
+            pipeline_sending_kwargs=kwargs,
         )
 
     def add_parent(
@@ -110,7 +114,7 @@ class SimpleRunner:
             connector = self._parents[share_connector_with]["connector"]
         else:
             connector = self._create_connector(parent_class)
-        self._parents[parent_class.name] = dict(cls=parent_class, connector=connector)
+        self._parents[parent_class.name] = dict(connector=connector)
         return connector
 
     def add_receiving_params(self, params: Dict[str, Any]) -> None:
@@ -155,15 +159,14 @@ class SimpleRunner:
         """
         Send data to all children, using their send_data_to_connector method.
         """
-        if self._children:
-            for child_info in self._children.values():
-                share_data_subset = {key: share_data.get(key) for key in child_info["dict_keys"]}
-                child_info["cls"].send_data_to_connector(
-                    share_data=share_data_subset,
-                    connector=child_info["connector"],
-                    **child_info["pipeline_sending_kwargs"],
-                    **runner_sending_kwargs,
-                )
+        for child_info in self._children.values():
+            share_data_subset = {key: share_data.get(key) for key in child_info["dict_keys"]}
+            child_info["send_data_method"](
+                share_data=share_data_subset,
+                connector=child_info["connector"],
+                **child_info["pipeline_sending_kwargs"],
+                **runner_sending_kwargs,
+            )
 
     @abstractclassmethod
     def _init_run(self) -> None:

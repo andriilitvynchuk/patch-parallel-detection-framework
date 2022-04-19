@@ -3,7 +3,7 @@ from typing import Any, Dict
 import torch
 
 from dronedet.base import SimpleRunner
-from dronedet.utils import create_shared_array, crop_n_parts, import_object
+from dronedet.utils import calculate_overlap_value, create_shared_array, crop_n_parts, import_object
 
 
 class ReadImagesToBatchRunner(SimpleRunner):
@@ -16,6 +16,7 @@ class ReadImagesToBatchRunner(SimpleRunner):
         self._stream_reader_class = import_object(config["class"])
         self._n_buffers = config["n_buffers"]
         self._n_crops = config["n_crops"]
+        self._overlap_p = config["overlap_percent"]
         self._verbose = config.get("verbose", True)
 
     def _load_global_cfg(self, config: Dict[str, Any]) -> None:
@@ -25,8 +26,9 @@ class ReadImagesToBatchRunner(SimpleRunner):
         self._sources = [self._stream_reader_class(camera_params) for camera_params in self._cameras]
 
     def _init_buffers(self) -> None:
-        height = self._cameras[0]["height"] // int(self._n_crops**0.5)
-        width = self._cameras[0]["width"] // int(self._n_crops**0.5)
+        camera_height, camera_width = self._cameras[0]["height"], self._cameras[0]["width"]
+        height = camera_height // int(self._n_crops**0.5) + calculate_overlap_value(camera_height, self._overlap_p)
+        width = camera_width // int(self._n_crops**0.5) + calculate_overlap_value(camera_width, self._overlap_p)
         future_buffer_size = (len(self._cameras), self._n_crops, 3, height, width)
         self._image_buffers = [
             torch.empty(size=future_buffer_size, device=self._cameras[0]["device"], dtype=torch.uint8).share_memory_()
@@ -43,12 +45,15 @@ class ReadImagesToBatchRunner(SimpleRunner):
         # add copy of images on CPU in shared memory
         share_data["images_cpu"] = [create_shared_array(image.cpu().numpy()) for (image, _) in read_list]
 
-        # TODO: check if we need buffers at all
-        batch_tensor = self._image_buffers[len(self._timers["main_work_time"]) % self._n_buffers]
+        share_data["images_gpu"] = self._image_buffers[len(self._timers["main_work_time"]) % self._n_buffers]
+        share_data["crop_meta"] = []
         # memory is already allocated, just copy
         for index, (image, _) in enumerate(read_list):
-            batch_tensor[index] = crop_n_parts(image.unsqueeze(0))[0]
-        share_data["images_gpu"] = batch_tensor
+            cropped_image, meta = crop_n_parts(
+                image.unsqueeze(0), n_crops=self._n_crops, overlap_percent=self._overlap_p
+            )
+            share_data["images_gpu"][index] = cropped_image[0]  # cropped image has shape [1, N_crops, 3, H, W]
+            share_data["crop_meta"].append(meta)
 
         share_data["meta"] = [camera_meta for (_, camera_meta) in read_list]
         # if all cameras crashed - close pipeline

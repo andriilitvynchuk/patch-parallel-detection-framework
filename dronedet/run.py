@@ -12,9 +12,7 @@ from dronedet.visualization import VisualizationRunnerManager
 
 class DroneDetPipeline(SimplePipeline):
     def __init__(self, config: Dict[str, Any]):
-        self.read_images_to_batch_runner = ReadImagesToBatchRunner(
-            config=config["read_images_to_batch"], global_config=config
-        )
+        self.read_images_to_batch_runner = ReadImagesToBatchRunner(config=config["read_images"], global_config=config)
         self.visualization_runner_manager = VisualizationRunnerManager(
             config=config["visualization"], global_config=config
         )
@@ -23,12 +21,6 @@ class DroneDetPipeline(SimplePipeline):
         self.read_images_to_batch_runner.add_child(
             self.visualization_runner_manager, dict_keys=["images_cpu", "meta"], unbatch_keys=["images_cpu", "meta"]
         )
-
-    def start(self) -> None:
-        self._recursive_start(self.read_images_to_batch_runner)
-
-    def join(self) -> None:
-        self._recursive_join(self.read_images_to_batch_runner)
 
 
 def run(cfg: DictConfig) -> None:
@@ -48,5 +40,5 @@ def main(cfg: DictConfig) -> None:
 
 
 if __name__ == "__main__":
-    multiprocessing.set_start_method("fork")
+    multiprocessing.set_start_method("spawn")
     main()
