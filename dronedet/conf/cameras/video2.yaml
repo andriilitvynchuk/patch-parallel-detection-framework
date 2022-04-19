@@ -2,7 +2,7 @@
 # Key is unique for list of configs
 video2:
   path: data/videos/test_stream.mp4
-  name: camera2
+  name: video2
   height: 736
   width: 1280
   framerate: every_frame
