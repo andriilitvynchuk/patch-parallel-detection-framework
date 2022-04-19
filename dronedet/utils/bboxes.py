@@ -21,7 +21,7 @@ def draw_bbox(
     text_color: Union[str, Tuple[int, int, int]],
     thickness: int = 4,
     font_thickness: int = 2,
-    font_scale: int = 2,
+    font_scale: float = 2,
     font: int = cv2.FONT_HERSHEY_SIMPLEX,
 ) -> np.ndarray:
     cv2.rectangle(image, left_top, right_bottom, bbox_color, thickness=thickness)

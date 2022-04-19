@@ -1,6 +1,6 @@
 class: dronedet.models.Yolov5Detector
 params:
-  weights_path: path_to_model.pths
+  weights_path: path_to_model.pth
   device: cpu # cuda device, i.e. 0 or 0,1,2,3 or cpu
   input_size: [1280, 1280] # inference size h,w
   nms_conf_thres: 0.44 # confidence threshold

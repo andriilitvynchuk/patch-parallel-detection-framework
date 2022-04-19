@@ -1,4 +1,6 @@
 resize: [540, 960]
+detection_class_names: ["object"]
+detection_class_colors: [[255, 0, 0]]
 save:
   folder_path: logs
   video:

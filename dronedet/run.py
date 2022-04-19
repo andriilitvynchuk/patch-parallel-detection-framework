@@ -18,7 +18,9 @@ class DroneDetPipeline(SimplePipeline):
 
     def connect_runners(self) -> None:
         self.read_images_to_batch_runner.add_child(
-            self.visualization_runner_manager, dict_keys=["images_cpu", "meta"], unbatch_keys=["images_cpu", "meta"]
+            self.visualization_runner_manager,
+            dict_keys=["images_cpu", "bboxes", "meta"],
+            unbatch_keys=["images_cpu", "bboxes", "meta"],
         )
 
     def start(self) -> None:
