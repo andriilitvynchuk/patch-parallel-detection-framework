@@ -25,13 +25,10 @@ class Yolov5Detector(SimpleDeepModel):
         self._iou_thres = config["iou_thres"]  # NMS IOU threshold
         self._iou_thres_post = config["iou_thres_post"]
         self._max_det = config["max_det"]  # maximum detections per image
-        self._classes = config["classes"]  # filter by class: --class 0, or --class 0 2 3
-        self._agnostic_nms = config["agnostic_nms"]  # class-agnostic NMS
-        self._classify = config["classify"]  # False
-        self._stride = config["stride"]
 
     def _load_model(self) -> None:
         self._model = torch.jit.load(self._model_path)
+        self._model = self._model.eval().to(self._device).to(self._precision)
         self._warmup()
 
     def _warmup(self) -> None:
@@ -99,29 +96,33 @@ class Yolov5Detector(SimpleDeepModel):
     #         detections.append(result)
     #     return detections
 
-    def forward_batch(self, batch: torch.Tensor) -> np.ndarray:
+    def forward_batch(self, batch: torch.Tensor) -> List[np.ndarray]:  # type: ignore
         with torch.no_grad():
             preprocessed_input = self._preprocess_batch(batch)
-            print(preprocessed_input.size())
             (results,) = self._model(preprocessed_input)
-            print(results.size())
+            results = non_max_suppression(results, self._nms_conf_thres, self._iou_thres, max_det=self._max_det)
+        return [result.cpu().numpy() for result in results]
 
-    def forward_image(self, image: torch.Tensor) -> List[np.ndarray]:
-        """
-        returns: [[x, y, w, h, conf, cls], ...]
-        """
-        # preprocess
-        im, im0s = self._preprocess(img)
+    def forward_image(self, image: torch.Tensor) -> np.ndarray:  # type: ignore
+        output = self.forward_batch(image.unsqueeze(0))
+        return output[0]
 
-        # Inference
-        pred = self._model(im, augment=self._augment, visualize=False)
+    # def forward_image(self, image: torch.Tensor) -> List[np.ndarray]:
+    #     """
+    #     returns: [[x, y, w, h, conf, cls], ...]
+    #     """
+    #     # preprocess
+    #     im, im0s = self._preprocess(img)
 
-        # NMS
-        pred = non_max_suppression(
-            pred, self._nms_conf_thres, self._iou_thres, self._classes, self._agnostic_nms, max_det=self._max_det
-        )
+    #     # Inference
+    #     pred = self._model(im, augment=self._augment, visualize=False)
 
-        # Process predictions
-        pred = self._postprocess_detections(pred, im, im0s)[0]
+    #     # NMS
+    #     pred = non_max_suppression(
+    #         pred, self._nms_conf_thres, self._iou_thres, self._classes, self._agnostic_nms, max_det=self._max_det
+    #     )
 
-        return pred
+    #     # Process predictions
+    #     pred = self._postprocess_detections(pred, im, im0s)[0]
+
+    #     return pred

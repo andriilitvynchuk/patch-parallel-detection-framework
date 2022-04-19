@@ -3,7 +3,7 @@
 video:
   path: data/videos/validation.mkv
   name: video1
-  height: 736
+  height: 1280
   width: 1280
   framerate: every_frame
   colorspace: RGB

@@ -16,9 +16,4 @@ params:
   iou_thres: 0.3 # NMS IOU threshold
   iou_thres_post: 0.8
   max_det: 1000 # maximum detections per image
-  classes: null # filter by class: --class 0, or --class 0 2 3
-  agnostic_nms: False # class-agnostic NMS
-  classify: False # False
-  suffixes: [".pt", ".onnx"]
-  stride: 32
-  output_size: [736, 1280]
+  output_size: [1280, 1280]
