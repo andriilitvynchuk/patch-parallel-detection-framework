@@ -1,4 +1,4 @@
 class: dronedet.stream_readers.MultithreadingOpencvStreamCapture
 n_buffers: 3
-n_crops: 1
-overlap_percent: 0
+n_crops: 4
+overlap_percent: 0.1

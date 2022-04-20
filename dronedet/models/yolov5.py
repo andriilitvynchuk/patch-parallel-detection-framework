@@ -34,7 +34,7 @@ class Yolov5Detector(SimpleDeepModel):
     def _gpu_preprocess(self, images: torch.Tensor) -> torch.Tensor:  # type: ignore
         if self._need_resize:
             images = torch.nn.functional.interpolate(
-                images, size=self._input_size, mode="bilinear", align_corners=True
+                images.to(torch.float32), size=self._input_size, mode="bilinear", align_corners=True
             )
         batch = images.to(self._precision)
         if self._need_norm:
@@ -44,30 +44,6 @@ class Yolov5Detector(SimpleDeepModel):
     def _preprocess_batch(self, batch: torch.Tensor) -> torch.Tensor:  # type: ignore
         gpu_preprocessed_images = self._gpu_preprocess(images=batch)
         return gpu_preprocessed_images
-
-    # def _preprocess(self, img0: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    #     """
-    #     Args:
-    #         img: 3-dimentional image in BGR format
-    #     """
-
-    #     # Padded resize
-    #     # img = letterbox(img0, self._input_size, stride=self._stride, auto=self._auto_letterbox)[0]
-    #     img =
-
-    #     # Convert
-    #     img = img.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
-    #     img = np.ascontiguousarray(img)
-
-    #     im, im0s = img, img0
-
-    #     im = torch.from_numpy(im).to(self._device)
-    #     im = im.half() if self._half else im.float()  # uint8 to fp16/32
-    #     im /= 255  # 0 - 255 to 0.0 - 1.0
-    #     if len(im.shape) == 3:
-    #         im = im[None]  # expand for batch dim
-
-    #     return im, im0s
 
     # @staticmethod
     # def _postprocess_detections(pred: Sequence, im: np.ndarray, im0s: np.ndarray) -> List[List]:
@@ -95,23 +71,3 @@ class Yolov5Detector(SimpleDeepModel):
     def forward_image(self, image: torch.Tensor) -> np.ndarray:  # type: ignore
         output = self.forward_batch(image.unsqueeze(0))
         return output[0]
-
-    # def forward_image(self, image: torch.Tensor) -> List[np.ndarray]:
-    #     """
-    #     returns: [[x, y, w, h, conf, cls], ...]
-    #     """
-    #     # preprocess
-    #     im, im0s = self._preprocess(img)
-
-    #     # Inference
-    #     pred = self._model(im, augment=self._augment, visualize=False)
-
-    #     # NMS
-    #     pred = non_max_suppression(
-    #         pred, self._nms_conf_thres, self._iou_thres, self._classes, self._agnostic_nms, max_det=self._max_det
-    #     )
-
-    #     # Process predictions
-    #     pred = self._postprocess_detections(pred, im, im0s)[0]
-
-    #     return pred

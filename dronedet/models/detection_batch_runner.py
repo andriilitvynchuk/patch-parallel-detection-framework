@@ -28,15 +28,16 @@ class DetectionBatchRunner(SimpleRunner):
         self._model = self._model_class(self._config["params"])
 
     def _process(self, share_data: Dict[str, Any]) -> Dict[str, Any]:
-        batch_tensor = share_data["images_gpu"]  # size is [B, N_crops, 3, H_new, W_new]
-        batch_tensor = batch_tensor.view(-1, *batch_tensor.shape[2:])  # size is [B * N_crops, 3, H_new, W_new]
+        crop_batch_tensor = share_data["images_gpu"]  # [B, N_crops, 3, H_new, W_new]
+        batch_tensor = crop_batch_tensor.view(-1, *crop_batch_tensor.shape[2:])  # [B * N_crops, 3, H_new, W_new]
         meta = share_data["meta"]
 
-        leave_images_for_model = [
-            index
-            for index in range(batch_tensor.size(0))
-            if meta[index]["success"] and meta[index]["time"] - self._last_time_empty[index] > self._lazy_mode_time
-        ]
+        leave_images_for_model = []
+        for index in range(crop_batch_tensor.size(0)):
+            image_index = index // crop_batch_tensor.size(1)
+            time_from_empty = meta[image_index]["time"] - self._last_time_empty[image_index]
+            if meta[image_index]["success"] and time_from_empty > self._lazy_mode_time:
+                leave_images_for_model.append(index)
         subbatch_tensor = batch_tensor[leave_images_for_model]
         forwarded_bboxes = self._model(subbatch_tensor) if subbatch_tensor.size(0) > 0 else []
 
@@ -50,6 +51,8 @@ class DetectionBatchRunner(SimpleRunner):
             else:
                 image_bboxes = np.empty((0, 6))
             bboxes.append(image_bboxes)
+        if len(bboxes[0]) > 0:
+            print(bboxes)
 
         # add bboxes to shared memory to avoid extra pickles-unpickles.
         share_data["bboxes"] = [
