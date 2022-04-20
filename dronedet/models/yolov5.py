@@ -7,13 +7,6 @@ from dronedet.base.simple_deep_model import SimpleDeepModel
 from dronedet.utils import non_max_suppression
 
 
-# from .yolov5.models.common import DetectMultiBackend
-
-
-# from .yolov5.utils.augmentations import letterbox
-# from .yolov5.utils.general import scale_coords
-
-
 class Yolov5Detector(SimpleDeepModel):
     def __init__(self, config: Dict):
         self._load_cfg(config)
@@ -27,8 +20,8 @@ class Yolov5Detector(SimpleDeepModel):
         self._max_det = config["max_det"]  # maximum detections per image
 
     def _load_model(self) -> None:
-        self._model = torch.jit.load(self._model_path)
-        self._model = self._model.eval().to(self._device).to(self._precision)
+        self._model = torch.jit.load(self._model_path, map_location=self._device)
+        self._model = self._model.eval().to(self._precision)
         self._warmup()
 
     def _warmup(self) -> None:
@@ -39,9 +32,11 @@ class Yolov5Detector(SimpleDeepModel):
             print("Done")
 
     def _gpu_preprocess(self, images: torch.Tensor) -> torch.Tensor:  # type: ignore
-        batch = images.to(self._precision)
         if self._need_resize:
-            batch = torch.nn.functional.interpolate(batch, size=self._input_size, mode="nearest")
+            images = torch.nn.functional.interpolate(
+                images, size=self._input_size, mode="bilinear", align_corners=True
+            )
+        batch = images.to(self._precision)
         if self._need_norm:
             batch = (batch.to(self._norm_device) - self._norm_mean) / self._norm_std
         return batch.to(self._device)
@@ -49,12 +44,6 @@ class Yolov5Detector(SimpleDeepModel):
     def _preprocess_batch(self, batch: torch.Tensor) -> torch.Tensor:  # type: ignore
         gpu_preprocessed_images = self._gpu_preprocess(images=batch)
         return gpu_preprocessed_images
-
-    # def _warmup(self) -> None:
-    #     if self._input_size is not None:
-    #         self._model.warmup(imgsz=(1, 3, self._input_size[0], self._input_size[1]))
-    #     else:
-    #     x    self._model.warmup()
 
     # def _preprocess(self, img0: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     #     """

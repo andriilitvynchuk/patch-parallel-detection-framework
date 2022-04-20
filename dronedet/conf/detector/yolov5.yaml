@@ -1,8 +1,8 @@
 class: dronedet.models.Yolov5Detector
 params:
   model_path: dronedet/models/weights/yolov5_v00_1280x1280_8class_jit.pth
-  precision: FP32 # FP16 or FP32
-  device: cpu # cuda device, i.e. 0 or 0,1,2,3 or cpu
+  precision: FP16 # FP16 or FP32
+  device: cuda:0 # cuda device, i.e. 0 or 0,1,2,3 or cpu
   preprocessing:
     colorspace: RGB
     resize:

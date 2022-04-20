@@ -30,13 +30,12 @@ class SimpleDeepModel:
 
     def _load_cfg(self, config: Dict[str, Any]) -> None:
         self._model_path = config["model_path"]
-        self._precision = self._string_to_torch_dtype(config["precision"])
         self._device = torch.device(config["device"])
-
+        self._precision = self._string_to_torch_dtype(config["precision"])
         self._load_preprocessing(config["preprocessing"])
 
     def _string_to_torch_dtype(self, string: str) -> torch.dtype:
-        if string.lower() == "fp32":
+        if string.lower() == "fp32" or self._device == "cpu":
             return torch.float32
         elif string.lower() == "fp16":
             return torch.float16
