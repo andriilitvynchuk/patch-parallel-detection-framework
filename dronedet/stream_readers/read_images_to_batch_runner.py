@@ -1,6 +1,5 @@
 from typing import Any, Dict
 
-import numpy as np
 import torch
 
 import shared_numpy as snp
@@ -62,5 +61,4 @@ class ReadImagesToBatchRunner(SimpleRunner):
         self.is_running = any([camera_meta["success"] for camera_meta in share_data["meta"]])
         if not self.is_running:
             print("All cameras are not available")
-        share_data["bboxes"] = [np.array([100, 100, 1280, 1280, 0.8, 0]).reshape(1, -1)] * len(self._cameras)
         return share_data
