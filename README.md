@@ -15,6 +15,7 @@ For development:
 git clone --recursive https://github.com/yehor-morylov/drone_detection_inference_logic.git && cd drone_detection_inference_logic
 cd shared_numpy && python setup.py build_ext --inplace && pip install -e . && cd ..
 pip install -e .
+dvc pull
 ```
 
 It will install all dependencies and will link `dronedet` to this folder (you don't need to reinstall it after every code change).
