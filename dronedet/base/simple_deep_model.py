@@ -35,7 +35,7 @@ class SimpleDeepModel:
         self._load_preprocessing(config["preprocessing"])
 
     def _string_to_torch_dtype(self, string: str) -> torch.dtype:
-        if string.lower() == "fp32" or self._device == "cpu":
+        if string.lower() == "fp32" or self._device == torch.device("cpu"):
             return torch.float32
         elif string.lower() == "fp16":
             return torch.float16

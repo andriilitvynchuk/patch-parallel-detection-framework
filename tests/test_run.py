@@ -25,7 +25,7 @@ def video(custom_tmp_path: Path) -> Path:
     width, height = 1280, 720
     codec = cv2.VideoWriter_fourcc(*"XVID")
     video_writer = cv2.VideoWriter(str(video_path), codec, 30, (width, height), isColor=True)
-    number_of_frames = 150
+    number_of_frames = 30
     for index in range(number_of_frames):
         sample = np.random.randint(0, 255, size=(height, width, 3), dtype=np.uint8)
         video_writer.write(sample)
@@ -36,6 +36,7 @@ def video(custom_tmp_path: Path) -> Path:
 def overrides(logs_folder: Path, video: Path) -> List[str]:
     overrides = [f"hydra.run.dir={logs_folder}"]
     overrides.append(f"cameras.video.path={video}")
+    overrides.append("detector.params.device=cpu")
     return overrides
 
 
