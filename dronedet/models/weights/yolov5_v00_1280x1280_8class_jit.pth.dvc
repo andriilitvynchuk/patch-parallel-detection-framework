@@ -1,0 +1,4 @@
+outs:
+- md5: 292f540abd6e112cc8b0e504d513ea4c
+  size: 306265000
+  path: yolov5_v00_1280x1280_8class_jit.pth
