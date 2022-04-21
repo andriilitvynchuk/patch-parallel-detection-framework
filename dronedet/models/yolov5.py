@@ -13,9 +13,8 @@ class Yolov5Detector(SimpleDeepModel):
 
     def _load_cfg(self, config: Dict[str, Any]) -> None:
         super()._load_cfg(config)
-        self._nms_conf_thres = config["nms_conf_thres"]  # confidence threshold
-        self._iou_thres = config["iou_thres"]  # NMS IOU threshold
-        self._iou_thres_post = config["iou_thres_post"]
+        self._detection_threshold = config["detection_threshold"]  # confidence threshold
+        self._iou_threshold = config["iou_threshold"]  # NMS IOU threshold
         self._max_det = config["max_det"]  # maximum detections per image
 
     def _load_model(self) -> None:
@@ -54,7 +53,9 @@ class Yolov5Detector(SimpleDeepModel):
         with torch.no_grad():
             preprocessed_input = self._preprocess_batch(batch)
             (results,) = self._model(preprocessed_input)
-            results = non_max_suppression(results, self._nms_conf_thres, self._iou_thres, max_det=self._max_det)
+            results = non_max_suppression(
+                results, self._detection_threshold, self._iou_threshold, max_det=self._max_det
+            )
             results = [self._postprocess_image_bboxes(result, (batch.size(-2), batch.size(-1))) for result in results]
         return results
 

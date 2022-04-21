@@ -12,7 +12,6 @@ params:
       device: ${detector.params.device}
       mean: [0, 0, 0]
       std: [1, 1, 1]
-  nms_conf_thres: 0.44 # confidence threshold
-  iou_thres: 0.3 # NMS IOU threshold
-  iou_thres_post: 0.8
+  detection_threshold: 0.44 # confidence
+  iou_threshold: 0.3 # NMS
   max_det: 1000 # maximum detections per image
