@@ -3,8 +3,8 @@
 video:
   path: data/videos/validation.mkv
   name: video1
-  height: 1280
-  width: 1280
+  height: 1080
+  width: 1920
   framerate: every_frame
   colorspace: RGB
   channel_order: CHW

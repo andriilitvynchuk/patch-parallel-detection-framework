@@ -2,6 +2,7 @@ from typing import Any, List, Optional, Tuple, Union
 
 import cv2
 import numpy as np
+import torch
 
 
 def get_index(element: Any, element_list: List[Any]) -> Optional[Any]:
@@ -35,3 +36,19 @@ def draw_bbox(
         font_thickness,
     )
     return image
+
+
+def scale_bboxes_torch(
+    bboxes: torch.Tensor, input_size: Tuple[int, int], output_size: Tuple[int, int]
+) -> torch.Tensor:
+    h_scale = output_size[0] / input_size[0]
+    w_scale = output_size[1] / input_size[1]
+    scale_tensor = torch.tensor([w_scale, h_scale, w_scale, h_scale]).view(1, -1)
+    bboxes[:, :4] *= scale_tensor.to(bboxes.device).to(bboxes.dtype)
+    return bboxes
+
+
+def merge_bboxes_torch(
+    bboxes: torch.Tensor, input_size: Tuple[int, int], output_size: Tuple[int, int]
+) -> torch.Tensor:
+    pass

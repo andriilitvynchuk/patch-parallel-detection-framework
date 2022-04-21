@@ -110,3 +110,11 @@ class SimpleDeepModel:
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         return self.forward_batch(*args, **kwargs)
+
+    @property
+    def dtype(self) -> torch.dtype:
+        return self._precision
+
+    @property
+    def device(self) -> torch.device:
+        return self._device

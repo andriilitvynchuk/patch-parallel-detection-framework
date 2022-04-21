@@ -23,7 +23,7 @@ class VisualizationRunnerManager(SimpleRunnerManager):
 
     def _load_global_cfg(self, config: Dict[str, Any]) -> None:
         self._cameras = list(config["cameras"].values())  # cameras is list of dicts (e.g. video: {})
-        self._detection_output_size = config["detector"]["params"]["output_size"]
+        self._detection_output_size = (self._cameras[0]["height"], self._cameras[0]["width"])
 
     def _get_number_of_mini_runners(self) -> int:
         return len(self._cameras)

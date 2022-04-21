@@ -1,10 +1,9 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
-import numpy as np
 import torch
 
 from dronedet.base.simple_deep_model import SimpleDeepModel
-from dronedet.utils import non_max_suppression
+from dronedet.utils import non_max_suppression, scale_bboxes_torch
 
 
 class Yolov5Detector(SimpleDeepModel):
@@ -45,29 +44,20 @@ class Yolov5Detector(SimpleDeepModel):
         gpu_preprocessed_images = self._gpu_preprocess(images=batch)
         return gpu_preprocessed_images
 
-    # @staticmethod
-    # def _postprocess_detections(pred: Sequence, im: np.ndarray, im0s: np.ndarray) -> List[List]:
-    #     detections = list()
-    #     for i, det in enumerate(pred):
-    #         result = list()
-    #         if len(det):
-    #             # Rescale boxes from img_size to im0 size
-    #             det[:, :4] = scale_coords(im.shape[2:], det[:, :4], im0s.shape).round()
+    def _postprocess_image_bboxes(self, image_bboxes: torch.Tensor, output_size: Tuple[int, int]) -> torch.Tensor:
+        postprocessed = scale_bboxes_torch(
+            image_bboxes, input_size=self._input_size, output_size=output_size  # type: ignore
+        )
+        return postprocessed
 
-    #             for *xyxy, conf, cls in reversed(det.cpu().numpy()):
-    #                 x1, y1, x2, y2 = xyxy
-    #                 result.append([x1, y1, x2, y2, conf, cls])
-
-    #         detections.append(result)
-    #     return detections
-
-    def forward_batch(self, batch: torch.Tensor) -> List[np.ndarray]:  # type: ignore
+    def forward_batch(self, batch: torch.Tensor) -> List[torch.Tensor]:  # type: ignore
         with torch.no_grad():
             preprocessed_input = self._preprocess_batch(batch)
             (results,) = self._model(preprocessed_input)
             results = non_max_suppression(results, self._nms_conf_thres, self._iou_thres, max_det=self._max_det)
-        return [result.cpu().numpy() for result in results]
+            results = [self._postprocess_image_bboxes(result, (batch.size(-2), batch.size(-1))) for result in results]
+        return results
 
-    def forward_image(self, image: torch.Tensor) -> np.ndarray:  # type: ignore
+    def forward_image(self, image: torch.Tensor) -> torch.Tensor:  # type: ignore
         output = self.forward_batch(image.unsqueeze(0))
         return output[0]

@@ -16,4 +16,3 @@ params:
   iou_thres: 0.3 # NMS IOU threshold
   iou_thres_post: 0.8
   max_det: 1000 # maximum detections per image
-  output_size: [1280, 1280]
