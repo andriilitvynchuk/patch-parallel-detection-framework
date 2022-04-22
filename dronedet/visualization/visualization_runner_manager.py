@@ -47,7 +47,7 @@ class VisualizationRunnerManager(SimpleRunnerManager):
         image: np.ndarray,
         results: np.ndarray,
         tracks: Optional[np.ndarray] = None,
-        font_scale: float = 1.0,
+        font_scale: float = 0.75,
         font_thickness: int = 2,
         thickness: int = 2,
     ) -> np.ndarray:
@@ -58,9 +58,8 @@ class VisualizationRunnerManager(SimpleRunnerManager):
             results = scale_bboxes_numpy(
                 bboxes=results, input_size=self._detection_output_size, output_size=image.shape[:2]
             )
-
         for index, bbox in enumerate(results):
-            text = f"{self._detection_class_names[int(bbox[-1])]}"
+            text = f"{self._detection_class_names[int(bbox[-1])]} {bbox[-2]:.2f}"
             if tracks is not None:
                 text += f"(Track #{int(tracks[index])})"
             image = draw_bbox(
