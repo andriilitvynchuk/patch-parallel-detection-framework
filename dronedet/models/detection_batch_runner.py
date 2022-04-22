@@ -5,7 +5,7 @@ import torch
 
 import shared_numpy as snp
 from dronedet.base import SimpleRunner
-from dronedet.utils import get_index, import_object
+from dronedet.utils import get_index, import_object, nms_all_bboxes
 
 
 class DetectionBatchRunner(SimpleRunner):
@@ -19,6 +19,7 @@ class DetectionBatchRunner(SimpleRunner):
     def _load_cfg(self, config: Dict[str, Any]) -> None:
         self._config = config
         self._model_class = import_object(config["class"])
+        self._after_merge_iou_threshold = config["after_merge_iou_threshold"]
         self._lazy_mode_time = config.get("lazy_mode_time", 0)
         self._verbose = config.get("verbose", True)
 
@@ -59,6 +60,7 @@ class DetectionBatchRunner(SimpleRunner):
                 bias_tensor = torch.tensor([width_bias, height_bias, width_bias, height_bias]).view(1, -1)
                 crop_bboxes[:, :4] += bias_tensor.to(crop_bboxes.device)
                 image_bboxes = torch.cat([image_bboxes, crop_bboxes])
+            image_bboxes = nms_all_bboxes(image_bboxes, self._after_merge_iou_threshold)
             forwarded_bboxes.append(image_bboxes)
 
         # if image has no predictions then lazy time starts

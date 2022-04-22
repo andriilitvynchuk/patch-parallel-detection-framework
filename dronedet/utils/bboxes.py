@@ -3,6 +3,7 @@ from typing import Any, List, Optional, Tuple, Union
 import cv2
 import numpy as np
 import torch
+from torchvision.ops import batched_nms
 
 
 def get_index(element: Any, element_list: List[Any]) -> Optional[Any]:
@@ -59,3 +60,13 @@ def merge_bboxes_torch(
     bboxes: torch.Tensor, input_size: Tuple[int, int], output_size: Tuple[int, int]
 ) -> torch.Tensor:
     pass
+
+
+def nms_all_bboxes(bboxes: torch.Tensor, iou_threshold: float) -> torch.Tensor:
+    """
+    bboxes: torch.Tensor with shape [N, 6]
+    """
+    scores = bboxes[:, 4]
+    idxs = torch.zeros_like(scores)
+    keep_indices = batched_nms(boxes=bboxes[:, :4], scores=scores, idxs=idxs, iou_threshold=iou_threshold)
+    return bboxes[keep_indices]
