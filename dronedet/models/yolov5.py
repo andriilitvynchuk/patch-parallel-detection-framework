@@ -25,7 +25,7 @@ class Yolov5Detector(SimpleDeepModel):
     def _warmup(self) -> None:
         if self._input_size is not None:
             print("Warming up ... ")
-            check_array = torch.randn(1, 3, *self._input_size[:2])
+            check_array = torch.randn(1, 3, *self._input_size)
             self.forward_batch(check_array)
             print("Done")
 

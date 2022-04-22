@@ -39,12 +39,19 @@ def draw_bbox(
 
 
 def scale_bboxes_torch(
-    bboxes: torch.Tensor, input_size: Tuple[int, int], output_size: Tuple[int, int]
+    bboxes: torch.Tensor, input_size: Tuple[int, ...], output_size: Tuple[int, ...]
 ) -> torch.Tensor:
     h_scale = output_size[0] / input_size[0]
     w_scale = output_size[1] / input_size[1]
     scale_tensor = torch.tensor([w_scale, h_scale, w_scale, h_scale]).view(1, -1)
     bboxes[:, :4] *= scale_tensor.to(bboxes.device).to(bboxes.dtype)
+    return bboxes
+
+
+def scale_bboxes_numpy(bboxes: np.ndarray, input_size: Tuple[int, ...], output_size: Tuple[int, ...]) -> np.ndarray:
+    h_scale = output_size[0] / input_size[0]
+    w_scale = output_size[1] / input_size[1]
+    bboxes[:, :4] *= np.array([w_scale, h_scale, w_scale, h_scale]).reshape(1, -1).astype(bboxes.dtype)
     return bboxes
 
 
