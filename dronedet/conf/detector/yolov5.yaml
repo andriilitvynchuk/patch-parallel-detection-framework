@@ -12,6 +12,7 @@ params:
       device: ${detector.params.device}
       mean: [0, 0, 0]
       std: [1, 1, 1]
-  detection_threshold: 0.44 # confidence
+  detection_threshold: 0.01 # confidence
   iou_threshold: 0.3 # NMS
   max_det: 1000 # maximum detections per image
+after_merge_iou_threshold: 0.7 # NMS after bbox merging
