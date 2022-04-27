@@ -1,0 +1,17 @@
+class: dronedet.models.Yolov5Detector
+params:
+  model_path: dronedet/models/weights/yolov5_v00_1280x1280_8class_jit.pth
+  precision: FP16 # FP16 or FP32
+  device: cuda:0 # cuda device, i.e. 0 or 0,1,2,3 or cpu
+  preprocessing:
+    colorspace: RGB
+    resize:
+      height: 1280
+      width: 1280
+    normalize:
+      device: ${detector.params.device}
+      mean: [0, 0, 0]
+      std: [1, 1, 1]
+  detection_threshold: 0.44 # confidence
+  iou_threshold: 0.3 # NMS
+  max_det: 1000 # maximum detections per image

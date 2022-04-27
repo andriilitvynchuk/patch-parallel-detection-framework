@@ -1,4 +1,22 @@
 resize: [540, 960]
+detection_class_names:
+  - tank/spa
+  - armored_carrier
+  - artillery
+  - military_truck
+  - MLRS
+  - unrec_military_vehicle
+  - not_sure
+  - suspicious_object
+detection_class_colors:
+  - [255, 0, 0]
+  - [255, 0, 0]
+  - [255, 0, 0]
+  - [255, 0, 0]
+  - [255, 0, 0]
+  - [255, 0, 0]
+  - [255, 0, 0]
+  - [255, 0, 0]
 save:
   folder_path: logs
   video:

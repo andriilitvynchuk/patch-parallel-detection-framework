@@ -2,10 +2,10 @@
 # Key is unique for list of configs
 video2:
   path: data/videos/test_stream.mp4
-  name: camera2
-  height: 736
-  width: 1280
+  name: video2
+  height: 1080
+  width: 1920
   framerate: every_frame
   colorspace: RGB
   channel_order: CHW
-  device: cpu
+  device: ${detector.params.device}

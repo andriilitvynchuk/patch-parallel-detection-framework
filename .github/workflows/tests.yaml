@@ -22,6 +22,7 @@ jobs:
           pip install -r requirements-dev.txt
           cd shared_numpy && python setup.py build_ext --inplace && pip install -e . && cd ..
           pip install -e .
+          dvc pull
 
       - name: Run tests
         run: |
