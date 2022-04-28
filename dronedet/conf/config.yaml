@@ -4,6 +4,7 @@ defaults:
       - video
   - read_images: opencv
   - detector: yolov5
+  - tracker: sort
   - visualization: default
 
   - override hydra/hydra_logging: colorlog

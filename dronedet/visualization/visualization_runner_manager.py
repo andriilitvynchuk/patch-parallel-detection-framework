@@ -84,11 +84,11 @@ class VisualizationRunnerManager(SimpleRunnerManager):
 
     def _process(self, share_data: Dict[str, Any], camera_index: int) -> None:
         image = share_data["images_cpu"]
-        bboxes = share_data["bboxes"]
+        bboxes = share_data["bboxes_with_tracks"]
         debug_image = image.transpose(1, 2, 0)
         if self._resize is not None:
             debug_image = cv2.resize(debug_image, dsize=(self._resize[1], self._resize[0]))
-        debug_image = self._visualize_detection_results(debug_image, bboxes)
+        debug_image = self._visualize_detection_results(debug_image, bboxes, tracks=bboxes[:, 4])
         debug_image = cv2.cvtColor(debug_image, cv2.COLOR_RGB2BGR)
         self._write_image(image=debug_image)
         # it is final Runner, delete shared memory

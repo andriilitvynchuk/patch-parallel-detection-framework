@@ -1,6 +1,6 @@
 class: dronedet.models.Sort
 params:
   max_age: 1
-  min_hits: 3
+  min_hits: 1
   iou_threshold: 0.3
   buffer: 1
