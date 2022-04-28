@@ -5,7 +5,7 @@ import torch
 
 import shared_numpy as snp
 from dronedet.base import SimpleRunner
-from dronedet.utils import get_index, import_object
+from dronedet.utils import get_index, import_object, nms_all_bboxes
 
 
 class DetectionBatchRunner(SimpleRunner):
@@ -19,6 +19,7 @@ class DetectionBatchRunner(SimpleRunner):
     def _load_cfg(self, config: Dict[str, Any]) -> None:
         self._config = config
         self._model_class = import_object(config["class"])
+        self._after_merge_iou_threshold = config["after_merge_iou_threshold"]
         self._lazy_mode_time = config.get("lazy_mode_time", 0)
         self._verbose = config.get("verbose", True)
 
@@ -33,15 +34,18 @@ class DetectionBatchRunner(SimpleRunner):
         crop_meta = share_data["crop_meta"]
         meta = share_data["meta"]
 
-        batch_tensor = crop_batch_tensor.view(-1, *crop_batch_tensor.shape[2:])  # [B * N_crops, 3, H_new, W_new]
-        leave_images_for_model = []
-        for index in range(batch_tensor.size(0)):
-            image_index = index // crop_batch_tensor.size(1)  # we operate on crop level but here we need image
-            time_from_empty = meta[image_index]["time"] - self._last_time_empty[image_index]
-            if meta[image_index]["success"] and time_from_empty > self._lazy_mode_time:
-                leave_images_for_model.append(index)
-        subbatch_tensor = batch_tensor[leave_images_for_model]
-        crop_forwarded_bboxes = self._model(subbatch_tensor) if subbatch_tensor.size(0) > 0 else []
+        # leave images for run: drop image if lazy_time is not over
+        leave_images_for_model = [
+            index
+            for index in range(crop_batch_tensor.size(0))
+            if meta[index]["success"] and meta[index]["time"] - self._last_time_empty[index] > self._lazy_mode_time
+        ]
+        subbatch_crop_tensor = crop_batch_tensor[leave_images_for_model]
+        crop_forwarded_bboxes = []
+        if subbatch_crop_tensor.size(0) > 0:
+            # [B, N_crops, 3, H_new, W_new] -> [B * N_crops, 3, H_new, W_new]
+            subbatch_tensor = crop_batch_tensor.view(-1, *subbatch_crop_tensor.shape[2:])
+            crop_forwarded_bboxes = self._model(subbatch_tensor)
 
         forwarded_bboxes = []
         # now merge predictions from crop to image level
@@ -56,8 +60,10 @@ class DetectionBatchRunner(SimpleRunner):
                 bias_tensor = torch.tensor([width_bias, height_bias, width_bias, height_bias]).view(1, -1)
                 crop_bboxes[:, :4] += bias_tensor.to(crop_bboxes.device)
                 image_bboxes = torch.cat([image_bboxes, crop_bboxes])
+            image_bboxes = nms_all_bboxes(image_bboxes, self._after_merge_iou_threshold)
             forwarded_bboxes.append(image_bboxes)
 
+        # if image has no predictions then lazy time starts
         bboxes = []
         for index in range(crop_batch_tensor.size(0)):
             index_in_forwarded_bboxes = get_index(element=index, element_list=leave_images_for_model)

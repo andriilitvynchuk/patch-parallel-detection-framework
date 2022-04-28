@@ -1,11 +1,11 @@
 import os
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
 import cv2
 import numpy as np
 
 from dronedet.base import SimpleRunnerManager  # type: ignore
-from dronedet.utils import draw_bbox, unlink_dict  # type: ignore
+from dronedet.utils import draw_bbox, scale_bboxes_numpy, unlink_dict  # type: ignore
 
 
 class VisualizationRunnerManager(SimpleRunnerManager):
@@ -42,35 +42,24 @@ class VisualizationRunnerManager(SimpleRunnerManager):
         height = camera_params["height"] if self._resize is None else self._resize[0]
         self._video_writer = cv2.VideoWriter(output_video, codec, fps, (width, height), isColor=True)
 
-    def _scale_bboxes(
-        self, bboxes: np.ndarray, input_size: Tuple[int, ...], output_size: Tuple[int, ...]
-    ) -> np.ndarray:
-        h_scale = output_size[0] / input_size[0]
-        w_scale = output_size[1] / input_size[1]
-        bboxes[:, :4] *= np.array([w_scale, h_scale, w_scale, h_scale]).reshape(1, -1)
-        return bboxes
-
-    def _scale_bboxes_to_fit_new_shape(
-        self, bboxes: np.ndarray, old_shape: Tuple[int, ...], new_shape: Tuple[int, ...]
-    ) -> np.ndarray:
-        if new_shape[:2] != old_shape[:2]:
-            bboxes = self._scale_bboxes(bboxes=bboxes, input_size=old_shape, output_size=new_shape)
-        return bboxes
-
     def _visualize_detection_results(
         self,
         image: np.ndarray,
         results: np.ndarray,
         tracks: Optional[np.ndarray] = None,
-        font_scale: float = 1.0,
+        font_scale: float = 0.75,
         font_thickness: int = 2,
         thickness: int = 2,
     ) -> np.ndarray:
         if self._detection_class_colors is None:
             raise ValueError("First choose colors")
-        results = self._scale_bboxes_to_fit_new_shape(results, self._detection_output_size, image.shape)
+
+        if image.shape[:2] != self._detection_output_size:
+            results = scale_bboxes_numpy(
+                bboxes=results, input_size=self._detection_output_size, output_size=image.shape[:2]
+            )
         for index, bbox in enumerate(results):
-            text = f"{self._detection_class_names[int(bbox[-1])]}"
+            text = f"{self._detection_class_names[int(bbox[-1])]} {bbox[-2]:.2f}"
             if tracks is not None:
                 text += f"(Track #{int(tracks[index])})"
             image = draw_bbox(
