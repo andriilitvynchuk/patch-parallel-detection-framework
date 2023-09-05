@@ -5,7 +5,7 @@ opencv-python==4.5.5.64
 opencv-python-headless==4.5.5.64
 filterpy==1.4.5
 scipy==1.7.3
-dvc==2.10.1
+dvc
 dvc[gdrive]
 torch
 torchvision
