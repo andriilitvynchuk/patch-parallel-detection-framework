@@ -1,10 +1,10 @@
-# Detection of pig-dogs military vehicles [![tests](https://github.com/yehor-morylov/drone_detection_inference_logic/actions/workflows/tests.yaml/badge.svg)](https://github.com/yehor-morylov/drone_detection_inference_logic/actions/workflows/tests.yaml)
+# Patch detection [![tests](https://github.com/litvinich/patch-parallel-detection-framework/actions/workflows/tests.yaml/badge.svg)](https://github.com/litvinich/patch-parallel-detection-framework/actions/workflows/tests.yaml)
 
 ## Using source code without cloning
 
 You can install this repository as python package. To do this:
 ```
-pip install git+https://github.com/yehor-morylov/drone_detection_inference_logic.git
+pip install git+https://github.com/litvinich/patch-parallel-detection-framework.git
 ```
 Still, you need install [shared_numpy](https://github.com/dillonalaird/shared_numpy.git) library.
 
@@ -12,7 +12,7 @@ Still, you need install [shared_numpy](https://github.com/dillonalaird/shared_nu
 
 For development:
 ```
-git clone --recursive https://github.com/yehor-morylov/drone_detection_inference_logic.git && cd drone_detection_inference_logic
+git clone --recursive https://https://github.com/litvinich/patch-parallel-detection-framework.git && cd drone_detection_inference_logic
 cd shared_numpy && python setup.py build_ext --inplace && pip install -e . && cd ..
 pip install -e .
 dvc pull

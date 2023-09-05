@@ -7,7 +7,7 @@ with open("requirements.txt") as file:
 
 setup(
     name="dronedet",
-    description="Package for finding of pig-dogs military vehicles",
+    description="Package for patch parallel detection",
     packages=find_packages(),
     install_requires=requirements,
     python_requires=">=3.6,<3.8",
