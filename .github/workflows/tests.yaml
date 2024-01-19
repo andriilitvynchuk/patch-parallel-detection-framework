@@ -25,4 +25,4 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest --cov=dronedet --cov-report term-missing tests/ -s
+          python -m pytest --cov=dronedet --cov-report term-missing tests/ -s
