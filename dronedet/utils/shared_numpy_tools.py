@@ -1,6 +1,6 @@
 from typing import Any, Dict, Union
 
-from shared_numpy.shared_numpy import SharedNDArray  # type: ignore
+from shared_numpy.shared_numpy import SharedNDArray
 
 
 def unlink_dict(dictionary: Dict[Any, Union[Any, SharedNDArray]]) -> None:
