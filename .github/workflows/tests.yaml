@@ -7,9 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
+        with:
+          lfs: true
+          submodules: true
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -20,9 +20,9 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements-dev.txt
-          cd shared_numpy && python setup.py build_ext --inplace && pip install -e . && cd ..
           pip install -e .
+          cd shared_numpy && python setup.py build_ext --inplace && pip install -e . && cd ..
 
       - name: Run tests
         run: |
-          pytest --cov=dronedet --cov-report term-missing tests/ -s
+          python -m pytest --cov=dronedet --cov-report term-missing tests/ -s

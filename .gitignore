@@ -24,6 +24,7 @@
 .DS_Store
 *.egg-info
 *.pyc
+.dvc
 
 docker/docker_build.sh
 logs/
