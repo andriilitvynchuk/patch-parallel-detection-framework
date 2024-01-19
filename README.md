@@ -13,8 +13,8 @@ Still, you need install [shared_numpy](https://github.com/dillonalaird/shared_nu
 For development:
 ```
 git clone --recursive https://https://github.com/litvinich/patch-parallel-detection-framework.git && cd drone_detection_inference_logic
-cd shared_numpy && python setup.py build_ext --inplace && pip install -e . && cd ..
 pip install -e .
+cd shared_numpy && python setup.py build_ext --inplace && pip install -e . && cd ..
 ```
 
 It will install all dependencies and will link `dronedet` to this folder (you don't need to reinstall it after every code change).
