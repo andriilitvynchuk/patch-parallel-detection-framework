@@ -9,8 +9,14 @@ pip install git+https://github.com/litvinich/patch-parallel-detection-framework.
 Still, you need install [shared_numpy](https://github.com/dillonalaird/shared_numpy.git) library and download the model (git lfs doesn't pull it with pip install). If you want to test it locally I recommend pulling the repository.
 
 ## Preparing of environment
-
-For development:
+Easiest way to run it is to use docker (for real test you need real videos in `data/videos/validation.mkv` pth. Contact me for video from drone, otherwise test it via pytest):
+```
+docker build -t drone .
+docker run --gpus all -it --rm drone bash
+(in docker) python -m dronedet.run
+OR (in docker) pytest tests -s
+```
+Without docker:
 ```
 git clone --recursive https://https://github.com/litvinich/patch-parallel-detection-framework.git && cd drone_detection_inference_logic
 pip install -e .
